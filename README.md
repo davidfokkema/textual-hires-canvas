@@ -4,7 +4,9 @@
 
 ## Screenshots
 
-![screenshot lines, a box and text](docs/images/screenshot-demo.png)
+![screenshot of demo showing lines, a box and text](docs/images/screenshot-demo.png)
+
+![video of demo showing lines, a box and text](https://github.com/user-attachments/assets/b39de904-3b43-414c-8cfd-6e31caa56c10)
 
 ## Quick demo / installation
 
