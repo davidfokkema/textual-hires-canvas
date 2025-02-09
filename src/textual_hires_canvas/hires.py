@@ -1,5 +1,6 @@
 import enum
 import itertools
+from typing import Any
 
 from textual.geometry import Size
 
@@ -16,7 +17,7 @@ hires_sizes = {
     HiResMode.BRAILLE: Size(2, 4),
 }
 
-pixels = {
+pixels: dict[HiResMode, dict[tuple[int, ...], str | None]] = {
     HiResMode.HALFBLOCK: {(0, 0): None, (1, 0): "▀", (0, 1): "▄", (1, 1): "█"},
     HiResMode.QUADRANT: {
         (0, 0, 0, 0): None,
@@ -298,9 +299,11 @@ pixels = {
 
 if __name__ == "__main__":
 
-    def get_pixel_ordering(d8, d7, d6, d5, d4, d3, d2, d1) -> tuple[int]:
+    def get_pixel_ordering(
+        d8: int, d7: int, d6: int, d5: int, d4: int, d3: int, d2: int, d1: int
+    ) -> tuple[int, int, int, int, int, int, int, int]:
         return d1, d4, d2, d5, d3, d6, d7, d8
 
     for i, perm in zip(range(0x2800, 0x2900), itertools.product([0, 1], repeat=8)):
-        pixels = get_pixel_ordering(*perm)
-        print(f'{pixels}: "{chr(i)}",')
+        pixel_tuple = get_pixel_ordering(*perm)
+        print(f'{pixel_tuple}: "{chr(i)}",')

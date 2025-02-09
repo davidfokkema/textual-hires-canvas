@@ -12,7 +12,7 @@ class DemoApp(App[None]):
     _bdx = 1
     _by = 0
     _bdy = 1
-    _tidx = 0
+    _tidx = 0.0
 
     def compose(self) -> ComposeResult:
         yield Canvas(40, 20)

@@ -108,7 +108,9 @@ class Canvas(Widget):
         hires_mode: HiResMode = HiResMode.HALFBLOCK,
         style: str = "white",
     ) -> None:
-        pixel_size = hires_sizes.get(hires_mode)
+        assert self._canvas_size is not None
+        assert self._canvas_region is not None
+        pixel_size = hires_sizes[hires_mode]
         hires_size_x = self._canvas_size.width * pixel_size.width
         hires_size_y = self._canvas_size.height * pixel_size.height
         hires_buffer = np.zeros(
@@ -116,7 +118,7 @@ class Canvas(Widget):
             dtype=np.bool,
         )
         for x, y in coordinates:
-            if not self._canvas_region.contains(x, y):
+            if not self._canvas_region.contains(floor(x), floor(y)):
                 # coordinates are outside canvas
                 continue
             hires_buffer[floor(y * pixel_size.height)][floor(x * pixel_size.width)] = (
@@ -128,7 +130,7 @@ class Canvas(Widget):
                     y : y + pixel_size.height, x : x + pixel_size.width
                 ]
                 subpixels = tuple(int(v) for v in subarray.flat)
-                if char := pixels.get(hires_mode).get(subpixels):
+                if char := pixels[hires_mode][subpixels]:
                     self.set_pixel(
                         x // pixel_size.width,
                         y // pixel_size.height,
@@ -142,6 +144,7 @@ class Canvas(Widget):
     def draw_line(
         self, x0: int, y0: int, x1: int, y1: int, char: str = "█", style: str = "white"
     ) -> None:
+        assert self._canvas_region is not None
         if not self._canvas_region.contains(
             x0, y0
         ) and not self._canvas_region.contains(x1, y1):
@@ -174,15 +177,16 @@ class Canvas(Widget):
         hires_mode: HiResMode = HiResMode.HALFBLOCK,
         style: str = "white",
     ) -> None:
-        pixel_size = hires_sizes.get(hires_mode)
+        assert self._canvas_region is not None
+        pixel_size = hires_sizes[hires_mode]
         pixels = []
         for x0, y0, x1, y1 in coordinates:
             if not self._canvas_region.contains(
-                x0, y0
-            ) and not self._canvas_region.contains(x1, y1):
+                floor(x0), floor(y0)
+            ) and not self._canvas_region.contains(floor(x1), floor(y1)):
                 # coordinates are outside canvas
                 continue
-            coordinates = self._get_line_coordinates(
+            pixel_coordinates = self._get_line_coordinates(
                 floor(x0 * pixel_size.width),
                 floor(y0 * pixel_size.height),
                 floor(x1 * pixel_size.width),
@@ -194,7 +198,7 @@ class Canvas(Widget):
                         x / pixel_size.width,
                         y / pixel_size.height,
                     )
-                    for x, y in coordinates
+                    for x, y in pixel_coordinates
                 ]
             )
         self.set_hires_pixels(pixels, hires_mode, style)
