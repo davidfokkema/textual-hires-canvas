@@ -49,5 +49,9 @@ class DemoApp(App[None]):
             self._tidx = -20
 
 
-if __name__ == "__main__":
+def main():
     DemoApp().run()
+
+
+if __name__ == "__main__":
+    main()
