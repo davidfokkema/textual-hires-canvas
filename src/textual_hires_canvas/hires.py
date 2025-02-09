@@ -1,6 +1,5 @@
 import enum
 import itertools
-from typing import Any
 
 from textual.geometry import Size
 
