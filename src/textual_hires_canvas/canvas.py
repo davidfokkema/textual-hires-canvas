@@ -7,9 +7,7 @@ import numpy as np
 from rich.segment import Segment
 from rich.style import Style
 from rich.text import Text
-from textual import on
 from textual._box_drawing import BOX_CHARACTERS
-from textual.app import App, ComposeResult
 from textual.geometry import Region, Size
 from textual.message import Message
 from textual.strip import Strip
