@@ -3,8 +3,7 @@ from math import floor
 from textual import on
 from textual.app import App, ComposeResult
 
-from textual_hires_canvas.canvas import Canvas
-from textual_hires_canvas.hires import HiResMode
+from textual_hires_canvas import Canvas, HiResMode
 
 
 class DemoApp(App[None]):
