@@ -7,14 +7,16 @@ from textual_hires_canvas import Canvas, HiResMode
 
 
 class DemoApp(App[None]):
-    _bx = 0
-    _bdx = 1
-    _by = 0
-    _bdy = 1
-    _tidx = 0.0
+    _box_x_pos = 0
+    _box_y_pos = 0
+    _text_x_pos = 0.0
+
+    _box_x_step = 1
+    _box_y_step = 1
+    _text_x_step = 0.5
 
     def compose(self) -> ComposeResult:
-        yield Canvas(40, 20)
+        yield Canvas(1, 1)
 
     def on_mount(self) -> None:
         self.set_interval(1 / 10, self.redraw_canvas)
@@ -31,22 +33,26 @@ class DemoApp(App[None]):
         canvas.draw_line(0, 0, 8, 8)
         canvas.draw_line(0, 19, 39, 0, char="X", style="red")
         canvas.write_text(
-            floor(self._tidx),
+            floor(self._text_x_pos),
             10,
             "[green]This text is [bold]easy[/bold] to read",
         )
         canvas.draw_rectangle_box(
-            self._bx, self._by, self._bx + 20, self._by + 10, thickness=2
+            self._box_x_pos,
+            self._box_y_pos,
+            self._box_x_pos + 20,
+            self._box_y_pos + 10,
+            thickness=2,
         )
-        self._bx += self._bdx
-        if (self._bx <= 0) or (self._bx + 20 >= canvas.size.width - 1):
-            self._bdx *= -1
-        self._by += self._bdy
-        if (self._by <= 0) or (self._by + 10 >= canvas.size.height - 1):
-            self._bdy *= -1
-        self._tidx += 0.5
-        if self._tidx >= canvas.size.width + 20:
-            self._tidx = -20
+        self._box_x_pos += self._box_x_step
+        if (self._box_x_pos <= 0) or (self._box_x_pos + 20 >= canvas.size.width - 1):
+            self._box_x_step *= -1
+        self._box_y_pos += self._box_y_step
+        if (self._box_y_pos <= 0) or (self._box_y_pos + 10 >= canvas.size.height - 1):
+            self._box_y_step *= -1
+        self._text_x_pos += self._text_x_step
+        if self._text_x_pos >= canvas.size.width + 20:
+            self._text_x_pos = -20
 
 
 def main():
