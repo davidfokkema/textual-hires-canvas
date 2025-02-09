@@ -476,7 +476,6 @@ class Canvas(Widget):
     ) -> None:
         """
         Write text to the canvas at the specified position, with support for markup.
-        Also marks the texts pixels dirty for refreshing.
 
         Args:
             x (int): X-coordinate of the left edge of the text.
