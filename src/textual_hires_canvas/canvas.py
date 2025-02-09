@@ -319,6 +319,154 @@ class Canvas(Widget):
         for x in x0, x1:
             self.draw_line(x, y0 + 1, x, y1 - 1, char=get_box((T, 0, T, 0)), style=style)
 
+    def draw_filled_circle(self, cx: int, cy: int, radius: int, style: str = "white") -> None:
+        """
+        Draw a filled circle using Bresenham's algorithm. Compensates for 2:1 aspect ratio.
+
+        Args:
+            cx (int): X-coordinate of the center of the circle.
+            cy (int): Y-coordinate of the center of the circle.
+            radius (int): Radius of the circle.
+            style (str): Style of the pixels to be drawn.
+        """
+
+        def draw_horizontal_line(y, x1, x2):
+            for x in range(x1, x2 + 1):
+                self.set_pixel(x, y, char="█", style=style)
+
+        x = 0
+        y = radius
+        d = 3 - 2 * radius
+
+        while y >= x:
+            # Adjust y-coordinates to account for 2:1 aspect ratio
+            y1 = cy + (y + 1) // 2
+            y2 = cy + (x + 1) // 2
+            y3 = cy - x // 2
+            y4 = cy - y // 2
+
+            draw_horizontal_line(y1, cx - x, cx + x)
+            draw_horizontal_line(y4, cx - x, cx + x)
+            draw_horizontal_line(y2, cx - y, cx + y)
+            draw_horizontal_line(y3, cx - y, cx + y)
+
+            x += 1
+            if d > 0:
+                y -= 1
+                d = d + 4 * (x - y) + 10
+            else:
+                d = d + 4 * x + 6
+
+    def draw_filled_circle_highres(
+        self, cx: float, cy: float, radius: float, hires_mode: HiResMode = HiResMode.HALFBLOCK, style: str = "white"
+    ) -> None:
+        """
+        Draw a filled circle, with high-resolution support.
+
+        Args:
+            cx (float): X-coordinate of the center of the circle.
+            cy (float): Y-coordinate of the center of the circle.
+            radius (float): Radius of the circle.
+            hires_mode (HiResMode): The high-resolution mode to use.
+            style (str): Style of the pixels to be drawn.
+        """
+        pixels = []
+        pixel_size = hires_sizes[hires_mode]
+        scale_x = pixel_size.width
+        scale_y = pixel_size.height
+
+        # Calculate the aspect ratio
+        aspect_ratio = scale_x / scale_y
+
+        for y in range(int(-radius * scale_y), int(radius * scale_y) + 1):
+            for x in range(int(-radius * scale_x), int(radius * scale_x) + 1):
+                if (x / scale_x) ** 2 + (y / (scale_y * aspect_ratio)) ** 2 <= radius**2:
+                    pixels.append((cx + x / scale_x, cy + y / scale_y))
+
+        self.set_hires_pixels(pixels, hires_mode, style)
+
+
+    def draw_circle(
+        self, cx: int, cy: int, radius: int, style: str = "white"
+    ) -> None:
+        """
+        Draw a circle using Bresenham's algorithm. Compensates for 2:1 aspect ratio.
+
+        Args:
+            cx (int): X-coordinate of the center of the circle.
+            cy (int): Y-coordinate of the center of the circle.
+            radius (int): Radius of the circle.
+            style (str): Style of the pixels to be drawn.
+        """
+        x = radius
+        y = 0
+        decision = 1 - radius
+
+        while y <= x:
+            self.set_pixel(cx + x, cy + y // 2, "█", style)
+            self.set_pixel(cx - x, cy + y // 2, "█", style)
+            self.set_pixel(cx + x, cy - y // 2, "█", style)
+            self.set_pixel(cx - x, cy - y // 2, "█", style)
+            self.set_pixel(cx + y, cy + x // 2, "█", style)
+            self.set_pixel(cx - y, cy + x // 2, "█", style)
+            self.set_pixel(cx + y, cy - x // 2, "█", style)
+            self.set_pixel(cx - y, cy - x // 2, "█", style)
+
+            y += 1
+            if decision <= 0:
+                decision += 2 * y + 1
+            else:
+                x -= 1
+                decision += 2 * (y - x) + 1
+
+    def draw_circle_highres(
+        self, cx: float, cy: float, radius: float, hires_mode: HiResMode = HiResMode.HALFBLOCK, style: str = "white"
+    ) -> None:
+        """
+        Draw a circle with high-resolution support using Bresenham's algorithm. Compensates for 2:1 aspect ratio.
+
+        Args:
+            cx (float): X-coordinate of the center of the circle.
+            cy (float): Y-coordinate of the center of the circle.
+            radius (float): Radius of the circle.
+            hires_mode (HiResMode): The high-resolution mode to use.
+            style (str): Style of the pixels to be drawn.
+        """
+        pixels = []
+        pixel_size = hires_sizes[hires_mode]
+        scale_x = pixel_size.width
+        scale_y = pixel_size.height
+
+        # Calculate the aspect ratio
+        aspect_ratio = scale_x / scale_y
+
+        x: float = radius
+        y: float = 0
+        decision: float = 1 - radius
+
+        while y <= x:
+            pixels.extend(
+                [
+                    (cx + x, cy + y * aspect_ratio),
+                    (cx - x, cy + y * aspect_ratio),
+                    (cx + x, cy - y * aspect_ratio),
+                    (cx - x, cy - y * aspect_ratio),
+                    (cx + y, cy + x * aspect_ratio),
+                    (cx - y, cy + x * aspect_ratio),
+                    (cx + y, cy - x * aspect_ratio),
+                    (cx - y, cy - x * aspect_ratio),
+                ]
+            )
+
+            y += 0.5
+            if decision <= 0:
+                decision += 2 * y + 1
+            else:
+                x -= 0.5
+                decision += 2 * (y - x) + 1
+
+        self.set_hires_pixels(pixels, hires_mode, style)
+
     def write_text(
         self,
         x: int,
