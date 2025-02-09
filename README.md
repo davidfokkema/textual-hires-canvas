@@ -8,7 +8,7 @@
 
 ![video of demo showing lines, a box and text](https://github.com/user-attachments/assets/b39de904-3b43-414c-8cfd-6e31caa56c10)
 
-## Quick demo / installation
+## Running the demo / installation
 
 If you have [uv](https://astral.sh/uv/) installed, run
 ```console
@@ -52,6 +52,8 @@ if __name__ == "__main__":
 ```
 Here, the `Canvas` widget is initialised with size 40 by 20 and a rectangular box, a line, a high-resolution line and some text is displayed. Coordinates are given in (x, y) fashion where (0, 0) is the top-left corner of the widget. The `draw_line()` method accepts a `char` argument which you can pass any unicode character you'd like to draw in the terminal. The `style` argument accepts Textual/Rich styles like `green` or `yellow on blue`. The `HiresMode`s are `HALFBLOCK`, `QUADRANT` and `BRAILLE`.
 
+### Resizing the canvas
+
 To automatically resize the Canvas to fit the available space in your app or the terminal, you can handle the `Canvas.Resize` event and call `Canvas.reset(size=event.size)` to resize the canvas. Be aware that the canvas is cleared and you have to redraw, like this:
 ![screenshot of example resizable.py](docs/images/screenshot-resizable.png)
 ```python
@@ -87,6 +89,8 @@ class MinimalApp(App[None]):
 if __name__ == "__main__":
     MinimalApp().run()
 ```
+
+### The full demo code
 
 Finally, the code of the demo is given below, showing how you can handle simple animations:
 ```python
@@ -154,6 +158,19 @@ def main():
 if __name__ == "__main__":
     main()
 ```
+
+## List of canvas methods
+
+- `reset()` or `reset(size)`: clear the canvas.
+- `get_pixel(x, y)`: get character at pixel coordinages.
+- `set_pixel(x, y, char, style)`: set a character at pixel coordinates.
+- `set_pixels(coordinates, char, style)`: set multiple pixels.
+- `set_hires_pixels(coordinates, hires_mode, style)`: set high-resolution pixels.
+- `draw_line(x0, y0, x1, y1, char, style)`: draw a line consisting of specific characters.
+- `draw_lines(coordinates, char, style)`: draw multiple lines.
+- `draw_hires_line(x0, y0, x1, y1, hires_mode, style)`: draw a high-resolution line using a particular mode.
+- `draw_hires_lines(coordinates, hires_mode, style)`: draw multiple high-resolution lines. 
+- `draw_rectangle_box(x0, y0, x1, y1, thickness, style)`: draw a rectangle using box-drawing characters.
 
 ## Alternatives
 
