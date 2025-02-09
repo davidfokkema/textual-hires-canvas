@@ -55,7 +55,7 @@ class DemoApp(App[None]):
             self._text_x_pos = -20
 
 
-def main():
+def main() -> None:
     DemoApp().run()
 
 
