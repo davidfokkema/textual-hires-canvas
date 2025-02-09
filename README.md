@@ -1,0 +1,1 @@
+# High-resolution drawing canvas for Textual apps

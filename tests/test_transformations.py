@@ -1,7 +1,7 @@
 import pytest
 from textual.geometry import Region
 
-from textual_plot.plot_widget import (
+from textual_hires_canvas.plot_widget import (
     map_coordinate_to_hires_pixel,
     map_coordinate_to_pixel,
     map_pixel_to_coordinate,

@@ -13,7 +13,7 @@ from textual.geometry import Region
 from textual.widget import Widget
 from textual.widgets import Footer, Header
 
-from textual_plot.canvas import Canvas, HiResMode, TextAlign
+from textual_hires_canvas.canvas import Canvas, HiResMode, TextAlign
 
 ZOOM_FACTOR = 0.05
 
@@ -533,16 +533,16 @@ class DemoApp(App[None]):
         yield PlotWidget()
 
     def on_mount(self) -> None:
-        # self.set_interval(1 / 24, self.plot_refresh)
+        self.set_interval(1 / 24, self.plot_refresh)
         # self.plot_refresh()
-        plot = self.query_one(PlotWidget)
-        x, y = np.genfromtxt(
-            "night-spectrum.csv", delimiter=",", names=True, unpack=True
-        )
-        plot.plot(x, y, hires_mode=HiResMode.QUADRANT)
-        plot.set_ylimits(ymin=0)
-        plot.set_xlabel("Wavelength (nm)")
-        plot.set_ylabel("Intensity")
+        # plot = self.query_one(PlotWidget)
+        # x, y = np.genfromtxt(
+        #     "night-spectrum.csv", delimiter=",", names=True, unpack=True
+        # )
+        # plot.plot(x, y, hires_mode=HiResMode.QUADRANT)
+        # plot.set_ylimits(ymin=0)
+        # plot.set_xlabel("Wavelength (nm)")
+        # plot.set_ylabel("Intensity")
 
     def plot_refresh(self) -> None:
         plot = self.query_one(PlotWidget)

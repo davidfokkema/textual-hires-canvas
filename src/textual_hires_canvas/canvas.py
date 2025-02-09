@@ -15,7 +15,7 @@ from textual.message import Message
 from textual.strip import Strip
 from textual.widget import Widget
 
-from textual_plot.hires import HiResMode, hires_sizes, pixels
+from textual_hires_canvas.hires import HiResMode, hires_sizes, pixels
 
 get_box = BOX_CHARACTERS.__getitem__
 
