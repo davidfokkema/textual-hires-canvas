@@ -1,5 +1,5 @@
 demo:
-    uv run textual run textual_hires_canvas.plot_widget:DemoApp
+    uv run textual run textual_hires_canvas.canvas:DemoApp
 
 typecheck:
     uv run mypy -p textual_hires_canvas --strict
