@@ -79,7 +79,7 @@ class Canvas(Widget):
                     Segment(char, style=Style.parse(style))
                     for char, style in zip(self._buffer[y], self._styles[y])
                 ]
-            )
+            ).simplify()
         else:
             return Strip([])
 
