@@ -47,12 +47,15 @@ class Canvas(Widget):
         name: str | None = None,
         id: str | None = None,
         classes: str | None = None,
+        # FIXME: move this to PlotWidget, it has no place here.
+        scale_rectangle: Region | None = None,
         disabled: bool = False,
     ):
         super().__init__(name=name, id=id, classes=classes, disabled=disabled)
 
         self._buffer = []
         self._styles = []
+        self.scale_rectangle = scale_rectangle
 
         if width is not None and height is not None:
             self.reset(size=Size(width, height), refresh=False)
@@ -73,6 +76,7 @@ class Canvas(Widget):
         if size:
             self._canvas_size = size
             self._canvas_region = Region(0, 0, size.width, size.height)
+            self.scale_rectangle = Region(1, 1, size.width - 2, size.height - 2)
 
         if self._canvas_size:
             self._buffer = [
