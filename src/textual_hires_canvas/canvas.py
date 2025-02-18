@@ -80,13 +80,10 @@ class Canvas(Widget):
 
         if self._canvas_size:
             self._buffer = [
-                [" " for _ in range(self._canvas_size.width)]
-                for _ in range(self._canvas_size.height)
-            ]
-            self._styles = [
-                ["" for _ in range(self._canvas_size.width)]
-                for _ in range(self._canvas_size.height)
-            ]
+                [" " for _ in range(self._canvas_size.width)] for _ in
+                range(self._canvas_size.height)]
+            self._styles = [["" for _ in range(self._canvas_size.width)] for _ in
+                            range(self._canvas_size.height)]
 
         if refresh:
             self.refresh()
