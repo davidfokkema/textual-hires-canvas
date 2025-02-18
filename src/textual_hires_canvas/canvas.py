@@ -155,7 +155,8 @@ class Canvas(Widget):
             hires_mode: The Hi-Res mode to use.
             style: The style to apply to the character.
         """
-        assert self._canvas_size and self._canvas_region
+        assert self._canvas_size is not None
+        assert self._canvas_region is not None
         pixel_size = hires_sizes[hires_mode]
         hires_size_x = self._canvas_size.width * pixel_size.width
         hires_size_y = self._canvas_size.height * pixel_size.height
@@ -210,7 +211,7 @@ class Canvas(Widget):
             char: The character to draw.
             style: The style to apply to the character.
         """
-        assert self._canvas_region
+        assert self._canvas_region is not None
         if not self._canvas_region.contains(
             x0, y0
         ) and not self._canvas_region.contains(x1, y1):
@@ -267,7 +268,7 @@ class Canvas(Widget):
             hires_mode: The high-resolution mode to use.
             style: The style to apply to the character.
         """
-        assert self._canvas_region
+        assert self._canvas_region is not None
         pixel_size = hires_sizes[hires_mode]
         pixels = []
         for x0, y0, x1, y1 in coordinates:
