@@ -344,6 +344,9 @@ class Canvas(Widget):
             text (str): Text to be written.
             align (TextAlign): The alignment of the text within the canvas.
         """
+        if text == "":
+            return
+
         assert self._canvas_size is not None
         if y < 0 or y >= self._canvas_size.height:
             return
