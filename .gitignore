@@ -11,3 +11,5 @@ wheels/
 
 # Data files
 *.csv
+# Ignore Jetbrains IDE files
+/.idea/
