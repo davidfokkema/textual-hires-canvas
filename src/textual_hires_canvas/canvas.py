@@ -104,7 +104,7 @@ class Canvas(Widget):
                     Segment(char, style=Style.parse(style))
                     for char, style in zip(self._buffer[y], self._styles[y])
                 ]
-            )
+            ).simplify()
         return Strip([])
 
     def set_pixel(self, x: int, y: int, char: str = "█", style: str = "white") -> None:
