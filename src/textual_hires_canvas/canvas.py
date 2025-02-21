@@ -382,9 +382,8 @@ class Canvas(Widget):
             style (str): Style of the pixels to be drawn.
         """
         pixels = []
-        pixel_size = hires_sizes[hires_mode]
-        scale_x = pixel_size.width
-        scale_y = pixel_size.height
+        scale_x = 1
+        scale_y = 2
 
         # Calculate the aspect ratio
         aspect_ratio = scale_x / scale_y
@@ -442,9 +441,8 @@ class Canvas(Widget):
             style (str): Style of the pixels to be drawn.
         """
         pixels = []
-        pixel_size = hires_sizes[hires_mode]
-        scale_x = pixel_size.width
-        scale_y = pixel_size.height
+        scale_x = 1
+        scale_y = 2
 
         # Calculate the aspect ratio
         aspect_ratio = scale_x / scale_y
