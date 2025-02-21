@@ -344,7 +344,7 @@ class Canvas(Widget):
             style (str): Style of the pixels to be drawn.
         """
 
-        def draw_horizontal_line(y, x1, x2):
+        def draw_horizontal_line(y: int, x1: int, x2: int) -> None:
             for x in range(x1, x2 + 1):
                 self.set_pixel(x, y, char="█", style=style)
 

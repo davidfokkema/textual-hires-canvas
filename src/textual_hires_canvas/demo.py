@@ -8,19 +8,19 @@ from textual_hires_canvas import Canvas, HiResMode
 
 
 class DemoApp(App[None]):
-    _bx = 0
+    _bx = 0.0
     _bdx = 0.1
-    _by = 0
+    _by = 0.0
     _bdy = 0.1
     _tidx = 0.0
     _frame_count = 0
-    _fps = 0
+    _fps: float = 0.0
     _last_time = 0.0
     _canvas = Canvas(80, 20)
-    _fps_history = []
+    _fps_history: list[float] = []
     _graph_width = 40
     _graph_height = 15
-    _graph_lines = []
+    _graph_lines: list[tuple[float, float, float, float]] = []
 
     def compose(self) -> ComposeResult:
         yield self._canvas
