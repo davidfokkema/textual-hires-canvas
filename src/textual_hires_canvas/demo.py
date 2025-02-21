@@ -102,7 +102,7 @@ class DemoApp(App[None]):
         canvas.draw_line(0, 0, 8, 8)
         canvas.draw_line(0, 19, 39, 0, char="X", style="red")
         canvas.write_text(
-            floor(self._text_x_pos),
+            floor(self._tidx),
             10,
             "[green]This text is [bold]easy[/bold] to read",
         )
