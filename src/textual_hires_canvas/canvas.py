@@ -332,7 +332,9 @@ class Canvas(Widget):
                 x, y0 + 1, x, y1 - 1, char=get_box((T, 0, T, 0)), style=style
             )
 
-    def draw_filled_circle(self, cx: int, cy: int, radius: int, style: str = "white") -> None:
+    def draw_filled_circle(
+        self, cx: int, cy: int, radius: int, style: str = "white"
+    ) -> None:
         """Draw a filled circle using Bresenham's algorithm. Compensates for 2:1 aspect ratio.
 
         Args:
@@ -370,7 +372,12 @@ class Canvas(Widget):
                 d = d + 4 * x + 6
 
     def draw_filled_circle_highres(
-        self, cx: float, cy: float, radius: float, hires_mode: HiResMode = HiResMode.HALFBLOCK, style: str = "white"
+        self,
+        cx: float,
+        cy: float,
+        radius: float,
+        hires_mode: HiResMode = HiResMode.HALFBLOCK,
+        style: str = "white",
     ) -> None:
         """Draw a filled circle, with high-resolution support.
 
@@ -390,15 +397,14 @@ class Canvas(Widget):
 
         for y in range(int(-radius * scale_y), int(radius * scale_y) + 1):
             for x in range(int(-radius * scale_x), int(radius * scale_x) + 1):
-                if (x / scale_x) ** 2 + (y / (scale_y * aspect_ratio)) ** 2 <= radius**2:
+                if (x / scale_x) ** 2 + (
+                    y / (scale_y * aspect_ratio)
+                ) ** 2 <= radius**2:
                     pixels.append((cx + x / scale_x, cy + y / scale_y))
 
         self.set_hires_pixels(pixels, hires_mode, style)
 
-
-    def draw_circle(
-        self, cx: int, cy: int, radius: int, style: str = "white"
-    ) -> None:
+    def draw_circle(self, cx: int, cy: int, radius: int, style: str = "white") -> None:
         """Draw a circle using Bresenham's algorithm. Compensates for 2:1 aspect ratio.
 
         Args:
@@ -429,7 +435,12 @@ class Canvas(Widget):
                 decision += 2 * (y - x) + 1
 
     def draw_circle_highres(
-        self, cx: float, cy: float, radius: float, hires_mode: HiResMode = HiResMode.HALFBLOCK, style: str = "white"
+        self,
+        cx: float,
+        cy: float,
+        radius: float,
+        hires_mode: HiResMode = HiResMode.HALFBLOCK,
+        style: str = "white",
     ) -> None:
         """Draw a circle with high-resolution support using Bresenham's algorithm. Compensates for 2:1 aspect ratio.
 
