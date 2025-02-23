@@ -38,32 +38,42 @@ class RotatingCubeApp(App[None]):
                 [h, h, h],
             ]
         )
-        self.vertices_generator = update(cube_vertices)
-        self.set_interval(1 / 10, self.draw_cube)
+        self.cube_vertices_generator = update(cube_vertices)
+        self.torus_vertices_generator = update(generate_torus())
+        self.set_interval(1 / 10, self.draw)
 
     @on(Canvas.Resize)
     def resize_canvas(self, event: Canvas.Resize) -> None:
         event.canvas.reset(size=event.size)
 
-    def draw_cube(self):
-        """Draws the rotating cube on a given Canvas object."""
+    def draw(self) -> None:
         canvas = self.query_one(Canvas)
         canvas.reset()
         width = canvas.size.width
         height = canvas.size.height
+        self.draw_cube(canvas, width * 0.33, height / 2)
+        self.draw_torus(canvas, width * 0.67, height / 2)
 
-        projected_vertices = next(self.vertices_generator)
+    def draw_cube(self, canvas: Canvas, x_offset: float, y_offset: float):
+        """Draws the rotating cube on a given Canvas object."""
+        projected_vertices = next(self.cube_vertices_generator)
+        lines = []
         for edge in self.edges:
             x0, y0 = projected_vertices[edge[0]]
             x1, y1 = projected_vertices[edge[1]]
-            canvas.draw_hires_line(
-                x0 + width / 2,
-                y0 + height / 2,
-                x1 + width / 2,
-                y1 + height / 2,
-                hires_mode=HiResMode.BRAILLE,
-                style="#ffff00",
-            )
+            lines.append((x0 + x_offset, y0 + y_offset, x1 + x_offset, y1 + y_offset))
+        canvas.draw_hires_lines(
+            lines,
+            hires_mode=HiResMode.BRAILLE,
+            style="#ffff00",
+        )
+
+    def draw_torus(self, canvas: Canvas, x_offset: float, y_offset: float):
+        projected_vertices = next(self.torus_vertices_generator)
+        canvas.set_hires_pixels(
+            ((x + x_offset, y + y_offset) for x, y in projected_vertices),
+            hires_mode=HiResMode.BRAILLE,
+        )
 
 
 def rotation_matrix_y(angle):
@@ -111,6 +121,18 @@ def update(vertices):
         projected_vertices = apply_perspective(rotated_vertices)
         yield projected_vertices
         num += 1
+
+
+def generate_torus(R=10, r=4, num_u=30, num_v=15):
+    """Generates torus vertices."""
+    vertices = []
+    for u in np.linspace(0, 2 * np.pi, num_u):
+        for v in np.linspace(0, 2 * np.pi, num_v):
+            x = (R + r * np.cos(v)) * np.cos(u)
+            y = (R + r * np.cos(v)) * np.sin(u)
+            z = r * np.sin(v)
+            vertices.append([x, y, z])
+    return np.array(vertices)
 
 
 if __name__ == "__main__":
