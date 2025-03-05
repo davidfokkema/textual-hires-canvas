@@ -108,7 +108,7 @@ class Canvas(Widget):
                     for char, style in zip(self._buffer[y], self._styles[y])
                 ]
             ).simplify()
-        return Strip([])
+        return Strip.blank(cell_length=0)
 
     def set_pixel(self, x: int, y: int, char: str = "█", style: str = "white") -> None:
         """Sets a single pixel at the given coordinates.
