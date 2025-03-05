@@ -32,11 +32,12 @@ class Canvas(Widget):
         canvas: "Canvas"
         size: Size
 
+    default_hires_mode: HiResMode
+
     _canvas_size: Size | None = None
     _canvas_region: Region | None = None
     _buffer: list[list[str]]
     _styles: list[list[str]]
-    _default_hires_mode: HiResMode
 
     # FIXME: move this to PlotWidget, it has no place here.
     scale_rectangle: Region | None = None
@@ -72,7 +73,7 @@ class Canvas(Widget):
         self._buffer = []
         self._styles = []
         self.scale_rectangle = scale_rectangle
-        self._default_hires_mode = default_hires_mode
+        self.default_hires_mode = default_hires_mode
 
         if width is not None and height is not None:
             self.reset(size=Size(width, height), refresh=False)
@@ -177,7 +178,7 @@ class Canvas(Widget):
         """
         assert self._canvas_size is not None
         assert self._canvas_region is not None
-        hires_mode = hires_mode or self._default_hires_mode
+        hires_mode = hires_mode or self.default_hires_mode
         pixel_size = hires_sizes[hires_mode]
         hires_size_x = self._canvas_size.width * pixel_size.width
         hires_size_y = self._canvas_size.height * pixel_size.height
@@ -290,7 +291,7 @@ class Canvas(Widget):
             style: The style to apply to the character.
         """
         assert self._canvas_region is not None
-        hires_mode = hires_mode or self._default_hires_mode
+        hires_mode = hires_mode or self.default_hires_mode
         pixel_size = hires_sizes[hires_mode]
         pixels = []
         for x0, y0, x1, y1 in coordinates:
