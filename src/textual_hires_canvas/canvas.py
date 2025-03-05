@@ -53,6 +53,20 @@ class Canvas(Widget):
         scale_rectangle: Region | None = None,
         disabled: bool = False,
     ):
+        """Initialize the Canvas widget.
+
+        Args:
+            width: The width of the canvas. Defaults to None.
+            height: The height of the canvas. Defaults to None.
+            default_hires_mode: The default high-resolution mode. Defaults to
+                HiresMode.BRAILLE.
+            name: The name of the widget. Defaults to None.
+            id: The ID of the widget. Defaults to None.
+            classes: The CSS classes of the widget. Defaults to None.
+            scale_rectangle: The scale rectangle for the widget. Defaults to
+                None.
+            disabled: Whether the widget is disabled. Defaults to False.
+        """
         super().__init__(name=name, id=id, classes=classes, disabled=disabled)
 
         self._buffer = []
