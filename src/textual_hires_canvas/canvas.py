@@ -371,7 +371,7 @@ class Canvas(Widget):
             else:
                 d = d + 4 * x + 6
 
-    def draw_filled_circle_highres(
+    def draw_filled_hires_circle(
         self,
         cx: float,
         cy: float,
@@ -434,7 +434,7 @@ class Canvas(Widget):
                 x -= 1
                 decision += 2 * (y - x) + 1
 
-    def draw_circle_highres(
+    def draw_hires_circle(
         self,
         cx: float,
         cy: float,
