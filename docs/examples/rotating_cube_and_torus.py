@@ -7,7 +7,7 @@ from textual_hires_canvas import Canvas, HiResMode
 
 class RotatingCubeApp(App[None]):
     def compose(self) -> ComposeResult:
-        yield Canvas()
+        yield Canvas(default_hires_mode=HiResMode.BRAILLE)
 
     def on_mount(self) -> None:
         self.edges = [
@@ -62,17 +62,12 @@ class RotatingCubeApp(App[None]):
             x0, y0 = projected_vertices[edge[0]]
             x1, y1 = projected_vertices[edge[1]]
             lines.append((x0 + x_offset, y0 + y_offset, x1 + x_offset, y1 + y_offset))
-        canvas.draw_hires_lines(
-            lines,
-            hires_mode=HiResMode.BRAILLE,
-            style="#ffff00",
-        )
+        canvas.draw_hires_lines(lines, style="#ffff00")
 
     def draw_torus(self, canvas: Canvas, x_offset: float, y_offset: float):
         projected_vertices = next(self.torus_vertices_generator)
         canvas.set_hires_pixels(
-            ((x + x_offset, y + y_offset) for x, y in projected_vertices),
-            hires_mode=HiResMode.BRAILLE,
+            ((x + x_offset, y + y_offset) for x, y in projected_vertices)
         )
 
 

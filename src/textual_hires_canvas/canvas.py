@@ -36,6 +36,7 @@ class Canvas(Widget):
     _canvas_region: Region | None = None
     _buffer: list[list[str]]
     _styles: list[list[str]]
+    _default_hires_mode: HiResMode
 
     # FIXME: move this to PlotWidget, it has no place here.
     scale_rectangle: Region | None = None
@@ -44,6 +45,7 @@ class Canvas(Widget):
         self,
         width: int | None = None,
         height: int | None = None,
+        default_hires_mode: HiResMode | None = HiResMode.BRAILLE,
         name: str | None = None,
         id: str | None = None,
         classes: str | None = None,
@@ -56,6 +58,7 @@ class Canvas(Widget):
         self._buffer = []
         self._styles = []
         self.scale_rectangle = scale_rectangle
+        self._default_hires_mode = default_hires_mode
 
         if width is not None and height is not None:
             self.reset(size=Size(width, height), refresh=False)
@@ -148,7 +151,7 @@ class Canvas(Widget):
     def set_hires_pixels(
         self,
         coordinates: Iterable[tuple[float, float]],
-        hires_mode: HiResMode = HiResMode.HALFBLOCK,
+        hires_mode: HiResMode | None = None,
         style: str = "white",
     ) -> None:
         """Sets multiple pixels at the given coordinates using the specified Hi-Res mode.
@@ -160,6 +163,7 @@ class Canvas(Widget):
         """
         assert self._canvas_size is not None
         assert self._canvas_region is not None
+        hires_mode = hires_mode or self._default_hires_mode
         pixel_size = hires_sizes[hires_mode]
         hires_size_x = self._canvas_size.width * pixel_size.width
         hires_size_y = self._canvas_size.height * pixel_size.height
@@ -243,7 +247,7 @@ class Canvas(Widget):
         y0: float,
         x1: float,
         y1: float,
-        hires_mode: HiResMode = HiResMode.HALFBLOCK,
+        hires_mode: HiResMode | None = None,
         style: str = "white",
     ) -> None:
         """Draws a high-resolution line from (x0, y0) to (x1, y1) using the specified character and style.
@@ -261,7 +265,7 @@ class Canvas(Widget):
     def draw_hires_lines(
         self,
         coordinates: Iterable[tuple[float, float, float, float]],
-        hires_mode: HiResMode = HiResMode.HALFBLOCK,
+        hires_mode: HiResMode | None = None,
         style: str = "white",
     ) -> None:
         """Draws multiple high-resolution lines from given coordinates using the specified character and style.
@@ -272,6 +276,7 @@ class Canvas(Widget):
             style: The style to apply to the character.
         """
         assert self._canvas_region is not None
+        hires_mode = hires_mode or self._default_hires_mode
         pixel_size = hires_sizes[hires_mode]
         pixels = []
         for x0, y0, x1, y1 in coordinates:
@@ -376,7 +381,7 @@ class Canvas(Widget):
         cx: float,
         cy: float,
         radius: float,
-        hires_mode: HiResMode = HiResMode.HALFBLOCK,
+        hires_mode: HiResMode | None = None,
         style: str = "white",
     ) -> None:
         """Draw a filled circle, with high-resolution support.
@@ -439,7 +444,7 @@ class Canvas(Widget):
         cx: float,
         cy: float,
         radius: float,
-        hires_mode: HiResMode = HiResMode.HALFBLOCK,
+        hires_mode: HiResMode | None = None,
         style: str = "white",
     ) -> None:
         """Draw a circle with high-resolution support using Bresenham's algorithm. Compensates for 2:1 aspect ratio.
