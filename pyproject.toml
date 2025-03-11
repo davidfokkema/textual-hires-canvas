@@ -1,6 +1,6 @@
 [project]
 name = "textual-hires-canvas"
-version = "0.5.0.post1"
+version = "0.5.0.post2"
 description = "High-resolution drawing canvas for Textual apps"
 readme = "README.md"
 authors = [{ name = "David Fokkema", email = "davidfokkema@icloud.com" }]
@@ -8,6 +8,12 @@ license = "MIT"
 license-files = ["LICENSE"]
 requires-python = ">=3.10"
 dependencies = ["numpy>=2.2.1", "textual>=1.0.0"]
+
+[project.urls]
+Homepage = "https://github.com/davidfokkema/textual-hires-canvas"
+Repository = "https://github.com/davidfokkema/textual-hires-canvas.git"
+Issues = "https://github.com/davidfokkema/textual-hires-canvas/issues"
+Changelog = "https://github.com/davidfokkema/textual-hires-canvas/blob/main/CHANGELOG.md"
 
 [build-system]
 requires = ["hatchling"]
