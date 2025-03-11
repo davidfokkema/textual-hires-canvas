@@ -4,7 +4,9 @@
 
 ## Screenshots
 
-![screenshot of demo showing lines, a box and text](docs/images/screenshot-demo.png)
+![screenshot of demo showing lines, a box and text](https://github.com/davidfokkema/textual-hires-canvas/blob/main/docs/images/screenshot-demo.png)
+
+![screenshot of analog clock](https://github.com/davidfokkema/textual-hires-canvas/blob/main/docs/images/screenshot-analog-clock.png)
 
 ![video of demo showing lines, a box and text](https://github.com/user-attachments/assets/b39de904-3b43-414c-8cfd-6e31caa56c10)
 
@@ -23,7 +25,7 @@ python -m textual_hires_canvas.demo
 ## Tutorial
 
 A simple example of using the canvas widget in your Textual app is given below.
-![screenshot of example minimal.py](docs/images/screenshot-minimal.png)
+![screenshot of example minimal.py](https://github.com/davidfokkema/textual-hires-canvas/blob/main/docs/images/screenshot-minimal.png)
 ```python
 from textual.app import App, ComposeResult
 
@@ -55,7 +57,7 @@ Here, the `Canvas` widget is initialised with size 40 by 20 and a rectangular bo
 ### Resizing the canvas
 
 To automatically resize the Canvas to fit the available space in your app or the terminal, you can handle the `Canvas.Resize` event and call `Canvas.reset(size=event.size)` to resize the canvas. Be aware that the canvas is cleared and you have to redraw, like this:
-![screenshot of example resizable.py](docs/images/screenshot-resizable.png)
+![screenshot of example resizable.py](https://github.com/davidfokkema/textual-hires-canvas/blob/main/docs/images/screenshot-resizable.png)
 ```python
 from textual import on
 from textual.app import App, ComposeResult
