@@ -3,8 +3,7 @@ from collections.abc import AsyncIterator, Iterable, Iterator
 from contextlib import asynccontextmanager, contextmanager
 from dataclasses import dataclass
 from math import floor
-from typing_extensions import Self
-
+from typing import Self
 
 import numpy as np
 from rich.segment import Segment
@@ -113,8 +112,8 @@ class Canvas(Widget):
             yield
         finally:
             self._refreshes_pending -= 1
-            if self._refreshes_pending < 1:
-                self.refresh(force=True)
+            if self._refreshes_pending == 0:
+                self.refresh()
 
     @asynccontextmanager
     async def async_batch_refresh(self) -> AsyncIterator[None]:
