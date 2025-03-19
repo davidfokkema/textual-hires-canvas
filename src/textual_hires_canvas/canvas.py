@@ -132,8 +132,8 @@ class Canvas(Widget):
             yield
         finally:
             self._refreshes_pending -= 1
-            if self._refreshes_pending < 1:
-                self.refresh(force=True)
+            if self._refreshes_pending == 0:
+                self.refresh()
 
     def refresh(
         self,
@@ -141,7 +141,6 @@ class Canvas(Widget):
         repaint: bool = True,
         layout: bool = False,
         recompose: bool = False,
-        force: bool = False,
     ) -> Self:
         if self._refreshes_pending:
             return self
