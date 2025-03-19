@@ -1,7 +1,10 @@
 import enum
-from collections.abc import Iterable
+from collections.abc import AsyncIterator, Iterable, Iterator
+from contextlib import asynccontextmanager, contextmanager
 from dataclasses import dataclass
 from math import floor
+from typing_extensions import Self
+
 
 import numpy as np
 from rich.segment import Segment
@@ -73,6 +76,9 @@ class Canvas(Widget):
         """
         super().__init__(name=name, id=id, classes=classes, disabled=disabled)
 
+        self._refreshes_pending: int = 0
+        # reference count batch refreshes
+
         self._buffer = []
         self._styles = []
         self._canvas_size = Size(0, 0)
@@ -82,6 +88,65 @@ class Canvas(Widget):
 
         if width is not None and height is not None:
             self.reset(size=Size(width, height), refresh=False)
+
+    @contextmanager
+    def batch_refresh(self) -> Iterator[None]:
+        """Context manager that defers call to refresh until exiting the context.
+
+        This is useful when making multiple changes to the canvas and only wanting
+        to trigger refresh once at the end.
+
+        Example:
+            ```python
+            with canvas.batch_changes():
+                canvas.set_pixel(0, 0)
+                canvas.set_pixel(1, 1)
+                canvas.set_pixel(2, 2)
+            # Refresh called
+            ```
+
+        Yields:
+            Iterator[None]: A context manager.
+        """
+        self._refreshes_pending += 1
+        try:
+            yield
+        finally:
+            self._refreshes_pending -= 1
+            if self._refreshes_pending < 1:
+                self.refresh(force=True)
+
+    @asynccontextmanager
+    async def async_batch_refresh(self) -> AsyncIterator[None]:
+        """Async context manager that defers call to refresh until exiting the context.
+
+        This is useful when making multiple asynchronous changes to the canvas and only wanting
+        to trigger refresh once at the end.
+
+        Example:
+                Yields:
+        AsyncIterator[None]: An async context manager.
+        """
+        self._refreshes_pending += 1
+        try:
+            yield
+        finally:
+            self._refreshes_pending -= 1
+            if self._refreshes_pending < 1:
+                self.refresh(force=True)
+
+    def refresh(
+        self,
+        *regions: Region,
+        repaint: bool = True,
+        layout: bool = False,
+        recompose: bool = False,
+        force: bool = False,
+    ) -> Self:
+        if self._refreshes_pending:
+            return self
+        super().refresh(*regions, repaint=repaint, layout=layout, recompose=recompose)
+        return self
 
     def _on_resize(self, event: Resize) -> None:
         self.post_message(self.Resize(canvas=self, size=event.size))

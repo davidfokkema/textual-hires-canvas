@@ -90,41 +90,42 @@ class DemoApp(App[None]):
     def redraw_canvas(self) -> None:
         self._frame_count += 1
         canvas = self._canvas
-        canvas.reset()
-        canvas.draw_hires_line(
-            0,
-            0,
-            canvas.size.width / 2,
-            canvas.size.height / 2,
-            hires_mode=HiResMode.BRAILLE,
-            style="blue",
-        )
-        canvas.draw_hires_line(2, 5, 78, 10, hires_mode=HiResMode.BRAILLE)
-        canvas.draw_line(0, 0, 8, 8)
-        canvas.draw_line(0, 19, 39, 0, char="X", style="red")
-        canvas.write_text(
-            floor(self._tidx),
-            10,
-            "[green]This text is [bold]easy[/bold] to read",
-        )
-        canvas.draw_rectangle_box(
-            int(self._bx),
-            int(self._by),
-            int(self._bx + 20),
-            int(self._by + 10),
-            thickness=2,
-        )
-        self._bx += self._bdx
-        if (self._bx <= 0) or (self._bx + 20 >= canvas.size.width - 1):
-            self._bdx *= -1
-        self._by += self._bdy
-        if (self._by <= 0) or (self._by + 10 >= canvas.size.height - 1):
-            self._bdy *= -1
-        self._tidx += 0.1
-        if self._tidx >= canvas.size.width + 20:
-            self._tidx = -20
+        with canvas.batch_refresh():
+            canvas.reset()
+            canvas.draw_hires_line(
+                0,
+                0,
+                canvas.size.width / 2,
+                canvas.size.height / 2,
+                hires_mode=HiResMode.BRAILLE,
+                style="blue",
+            )
+            canvas.draw_hires_line(2, 5, 78, 10, hires_mode=HiResMode.BRAILLE)
+            canvas.draw_line(0, 0, 8, 8)
+            canvas.draw_line(0, 19, 39, 0, char="X", style="red")
+            canvas.write_text(
+                floor(self._tidx),
+                10,
+                "[green]This text is [bold]easy[/bold] to read",
+            )
+            canvas.draw_rectangle_box(
+                int(self._bx),
+                int(self._by),
+                int(self._bx + 20),
+                int(self._by + 10),
+                thickness=2,
+            )
+            self._bx += self._bdx
+            if (self._bx <= 0) or (self._bx + 20 >= canvas.size.width - 1):
+                self._bdx *= -1
+            self._by += self._bdy
+            if (self._by <= 0) or (self._by + 10 >= canvas.size.height - 1):
+                self._bdy *= -1
+            self._tidx += 0.1
+            if self._tidx >= canvas.size.width + 20:
+                self._tidx = -20
 
-        self.draw_fps_charts()
+            self.draw_fps_charts()
 
 
 def main() -> None:
