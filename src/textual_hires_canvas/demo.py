@@ -72,18 +72,19 @@ class DemoApp(App[None]):
             0,
             canvas.size.height - 1,
             len(self._fps_history) + 1,
-            canvas.size.height - self._graph_height - 2,
+            canvas.size.height - self._graph_height - 3,
             thickness=2,
         )
         canvas.write_text(
             int(len(self._fps_history) / 2) - 4,
-            canvas.size.height - self._graph_height - 2,
+            canvas.size.height - self._graph_height - 3,
             f"[bold]FPS: {self._fps:.1f}[/bold]",
         )
 
         canvas.draw_hires_lines(
             self._graph_lines,
             style="red",
+            hires_mode=HiResMode.HALFBLOCK,
         )
 
     def redraw_canvas(self) -> None:
