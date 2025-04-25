@@ -259,7 +259,9 @@ class Canvas(Widget):
         assert self._canvas_region is not None and self._canvas_size.area
 
         # Fast rejection path without assert for performance
-        if not (0 <= x < self._canvas_region.width and 0 <= y < self._canvas_region.height):
+        if not (
+            0 <= x < self._canvas_region.width and 0 <= y < self._canvas_region.height
+        ):
             return
 
         self._buffer[y][x] = char
@@ -373,7 +375,9 @@ class Canvas(Widget):
                     style=style,
                 )
 
-    def draw_line(self, x0: int, y0: int, x1: int, y1: int, char: str = "█", style: str = "white") -> None:
+    def draw_line(
+        self, x0: int, y0: int, x1: int, y1: int, char: str = "█", style: str = "white"
+    ) -> None:
         """Draws a line from (x0, y0) to (x1, y1) using the specified character and style.
 
         Args:
@@ -385,7 +389,9 @@ class Canvas(Widget):
             style: The style to apply to the character.
         """
         assert self._canvas_region is not None
-        if not self._canvas_region.contains(x0, y0) and not self._canvas_region.contains(x1, y1):
+        if not self._canvas_region.contains(
+            x0, y0
+        ) and not self._canvas_region.contains(x1, y1):
             return
         self.set_pixels(self._get_line_coordinates(x0, y0, x1, y1), char, style)
 
@@ -414,7 +420,9 @@ class Canvas(Widget):
 
         for x0, y0, x1, y1 in coord_list:
             # Skip if both endpoints are outside the canvas
-            if not self._canvas_region.contains(x0, y0) and not self._canvas_region.contains(x1, y1):
+            if not self._canvas_region.contains(
+                x0, y0
+            ) and not self._canvas_region.contains(x1, y1):
                 continue
 
             # Get coordinates for this line and extend the pixel collection
@@ -484,9 +492,9 @@ class Canvas(Widget):
         # Process each line
         for x0, y0, x1, y1 in coord_list:
             # Skip if both endpoints are outside canvas (optimization)
-            if not self._canvas_region.contains(floor(x0), floor(y0)) and not self._canvas_region.contains(
-                floor(x1), floor(y1)
-            ):
+            if not self._canvas_region.contains(
+                floor(x0), floor(y0)
+            ) and not self._canvas_region.contains(floor(x1), floor(y1)):
                 continue
 
             # Convert to high-res grid coordinates
@@ -530,7 +538,9 @@ class Canvas(Widget):
         """
 
         # Draw the three sides of the triangle
-        self.draw_lines([(x0, y0, x1, y1), (x1, y1, x2, y2), (x2, y2, x0, y0)], "█", style)
+        self.draw_lines(
+            [(x0, y0, x1, y1), (x1, y1, x2, y2), (x2, y2, x0, y0)], "█", style
+        )
 
     def draw_hires_triangle(
         self,
@@ -557,7 +567,9 @@ class Canvas(Widget):
         """
 
         # Draw the three sides of the triangle with high-resolution
-        self.draw_hires_lines([(x0, y0, x1, y1), (x1, y1, x2, y2), (x2, y2, x0, y0)], hires_mode, style)
+        self.draw_hires_lines(
+            [(x0, y0, x1, y1), (x1, y1, x2, y2), (x2, y2, x0, y0)], hires_mode, style
+        )
 
     def draw_filled_triangle(
         self,
@@ -713,7 +725,9 @@ class Canvas(Widget):
         if abs(y1 - y0) < 1e-6:  # Flat top triangle
             self._fill_flat_top_hires_triangle(x0, y0, x1, y1, x2, y2, add_hires_pixel)
         elif abs(y1 - y2) < 1e-6:  # Flat bottom triangle
-            self._fill_flat_bottom_hires_triangle(x0, y0, x1, y1, x2, y2, add_hires_pixel)
+            self._fill_flat_bottom_hires_triangle(
+                x0, y0, x1, y1, x2, y2, add_hires_pixel
+            )
         else:  # General triangle - split into flat-top and flat-bottom
             # Calculate the interpolation factor for the split point
             t = (y1 - y0) / (y2 - y0)
@@ -722,7 +736,9 @@ class Canvas(Widget):
             x3 = x0 + t * (x2 - x0)
 
             # Fill the flat bottom part
-            self._fill_flat_bottom_hires_triangle(x0, y0, x1, y1, x3, y1, add_hires_pixel)
+            self._fill_flat_bottom_hires_triangle(
+                x0, y0, x1, y1, x3, y1, add_hires_pixel
+            )
 
             # Fill the flat top part
             self._fill_flat_top_hires_triangle(x1, y1, x3, y1, x2, y2, add_hires_pixel)
@@ -833,7 +849,11 @@ class Canvas(Widget):
             style: The style to apply to the characters.
         """
         # Draw the four sides of the quadrilateral
-        self.draw_lines([(x0, y0, x1, y1), (x1, y1, x2, y2), (x2, y2, x3, y3), (x3, y3, x0, y0)], "█", style)
+        self.draw_lines(
+            [(x0, y0, x1, y1), (x1, y1, x2, y2), (x2, y2, x3, y3), (x3, y3, x0, y0)],
+            "█",
+            style,
+        )
 
     def draw_hires_quad(
         self,
@@ -864,7 +884,9 @@ class Canvas(Widget):
         """
         # Draw the four sides of the quadrilateral with high-resolution
         self.draw_hires_lines(
-            [(x0, y0, x1, y1), (x1, y1, x2, y2), (x2, y2, x3, y3), (x3, y3, x0, y0)], hires_mode, style
+            [(x0, y0, x1, y1), (x1, y1, x2, y2), (x2, y2, x3, y3), (x3, y3, x0, y0)],
+            hires_mode,
+            style,
         )
 
     def draw_filled_quad(
@@ -960,11 +982,17 @@ class Canvas(Widget):
         self.set_pixel(x1, y1, char=get_box((T, 0, 0, T)), style=style)
         self.set_pixel(x0, y1, char=get_box((T, T, 0, 0)), style=style)
         for y in y0, y1:
-            self.draw_line(x0 + 1, y, x1 - 1, y, char=get_box((0, T, 0, T)), style=style)
+            self.draw_line(
+                x0 + 1, y, x1 - 1, y, char=get_box((0, T, 0, T)), style=style
+            )
         for x in x0, x1:
-            self.draw_line(x, y0 + 1, x, y1 - 1, char=get_box((T, 0, T, 0)), style=style)
+            self.draw_line(
+                x, y0 + 1, x, y1 - 1, char=get_box((T, 0, T, 0)), style=style
+            )
 
-    def draw_filled_circle(self, cx: int, cy: int, radius: int, style: str = "white") -> None:
+    def draw_filled_circle(
+        self, cx: int, cy: int, radius: int, style: str = "white"
+    ) -> None:
         """Draw a filled circle using Bresenham's algorithm. Compensates for 2:1 aspect ratio.
 
         Args:
@@ -1172,7 +1200,9 @@ class Canvas(Widget):
 
         # Initialize an empty list for collecting pixel coordinates
         # (We calculate estimated_size only for the safety check below)
-        estimated_size = int(radius * 16)  # Each step adds 8 pixels, estimate 4*radius steps
+        estimated_size = int(
+            radius * 16
+        )  # Each step adds 8 pixels, estimate 4*radius steps
         pixels = []
         pixels_extend = pixels.extend  # Local reference for faster calls
 
@@ -1286,12 +1316,16 @@ class Canvas(Widget):
             text_right = None
 
         self._buffer[y][buffer_left:buffer_right] = plain_text[text_left:text_right]
-        self._styles[y][buffer_left:buffer_right] = [str(s) for s in rich_styles[text_left:text_right]]
+        self._styles[y][buffer_left:buffer_right] = [
+            str(s) for s in rich_styles[text_left:text_right]
+        ]
         assert len(self._buffer[y]) == self._canvas_size.width
         assert len(self._styles[y]) == self._canvas_size.width
         self.refresh()
 
-    def _get_line_coordinates(self, x0: int, y0: int, x1: int, y1: int) -> list[tuple[int, int]]:
+    def _get_line_coordinates(
+        self, x0: int, y0: int, x1: int, y1: int
+    ) -> list[tuple[int, int]]:
         """Get all pixel coordinates on the line between two points.
 
         Fast implementation of Bresenham's line algorithm.
