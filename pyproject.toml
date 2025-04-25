@@ -6,7 +6,7 @@ readme = "README.md"
 authors = [{ name = "David Fokkema", email = "davidfokkema@icloud.com" }]
 license = "MIT"
 license-files = ["LICENSE"]
-requires-python = ">=3.11"
+requires-python = ">=3.10"
 dependencies = ["numpy>=2.2.1", "textual>=1.0.0"]
 
 [project.urls]
@@ -31,4 +31,5 @@ dev = [
 textual-hires-canvas = "textual_hires_canvas.demo:main"
 
 [tool.mypy]
+python_version = "3.10"
 plugins = "numpy.typing.mypy_plugin"

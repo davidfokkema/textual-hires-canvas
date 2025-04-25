@@ -1,9 +1,15 @@
 import enum
+import sys
 from collections.abc import AsyncIterator, Iterable, Iterator
 from contextlib import asynccontextmanager, contextmanager
 from dataclasses import dataclass
 from math import floor
-from typing import Self
+
+if sys.version_info >= (3, 11):
+    from typing import Self
+else:
+    from typing_extensions import Self
+
 
 import numpy as np
 from rich.segment import Segment
