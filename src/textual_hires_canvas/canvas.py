@@ -55,8 +55,8 @@ class Canvas(Widget):
 
     def __init__(
         self,
-        width: int | None = None,
-        height: int | None = None,
+        width: int = 40,
+        height: int = 20,
         default_hires_mode: HiResMode | None = HiResMode.BRAILLE,
         name: str | None = None,
         id: str | None = None,
@@ -68,8 +68,8 @@ class Canvas(Widget):
         """Initialize the Canvas widget.
 
         Args:
-            width: The width of the canvas. Defaults to None.
-            height: The height of the canvas. Defaults to None.
+            width: The width of the canvas. Defaults to 40.
+            height: The height of the canvas. Defaults to 20.
             default_hires_mode: The default high-resolution mode. Defaults to
                 HiresMode.BRAILLE.
             name: The name of the widget. Defaults to None.
@@ -91,8 +91,7 @@ class Canvas(Widget):
         self.scale_rectangle = scale_rectangle
         self.default_hires_mode = default_hires_mode or HiResMode.BRAILLE
 
-        if width is not None and height is not None:
-            self.reset(size=Size(width, height), refresh=False)
+        self.reset(size=Size(width, height), refresh=False)
 
     @contextmanager
     def batch_refresh(self) -> Iterator[None]:
@@ -262,8 +261,6 @@ class Canvas(Widget):
             char: The character to draw.
             style: The style to apply to the character.
         """
-        assert self._canvas_region is not None and self._canvas_size.area
-
         # Fast rejection path without assert for performance
         if not (
             0 <= x < self._canvas_region.width and 0 <= y < self._canvas_region.height
@@ -287,8 +284,6 @@ class Canvas(Widget):
             char: The character to draw.
             style: The style to apply to the character.
         """
-        assert self._canvas_region is not None and self._canvas_size.area
-
         # Check if we have coordinates
         coord_list = list(coordinates)
         if not coord_list:
@@ -323,8 +318,6 @@ class Canvas(Widget):
             hires_mode: The Hi-Res mode to use.
             style: The style to apply to the character.
         """
-        assert self._canvas_size.area and self._canvas_region is not None
-
         # Use default mode if none provided
         hires_mode = hires_mode or self.default_hires_mode
         pixel_size = hires_sizes[hires_mode]
@@ -414,8 +407,6 @@ class Canvas(Widget):
             char: The character to draw.
             style: The style to apply to the character.
         """
-        assert self._canvas_region is not None and self._canvas_size.area
-
         # Convert to list for multiple passes
         coord_list = list(coordinates)
         if not coord_list:
@@ -473,8 +464,6 @@ class Canvas(Widget):
             hires_mode: The high-resolution mode to use.
             style: The style to apply to the character.
         """
-        assert self._canvas_region is not None and self._canvas_size.area
-
         # Early out if no coordinates
         if not coordinates:
             return
@@ -599,8 +588,6 @@ class Canvas(Widget):
             y2: The y-coordinate of the third vertex.
             style: The style to apply to the characters.
         """
-        assert self._canvas_region is not None and self._canvas_size.area
-
         # Sort vertices by y-coordinate (y0 <= y1 <= y2)
         if y0 > y1:
             x0, y0, x1, y1 = x1, y1, x0, y0
@@ -700,8 +687,6 @@ class Canvas(Widget):
             hires_mode: The high-resolution mode to use.
             style: The style to apply to the characters.
         """
-        assert self._canvas_region is not None and self._canvas_size.area
-
         # Use default hires mode if none provided
         hires_mode = hires_mode or self.default_hires_mode
 
@@ -1007,8 +992,6 @@ class Canvas(Widget):
             radius (int): Radius of the circle.
             style (str): Style of the pixels to be drawn.
         """
-        assert self._canvas_region is not None and self._canvas_size.area
-
         # Early rejection for invalid inputs
         if radius <= 0:
             return
@@ -1071,8 +1054,6 @@ class Canvas(Widget):
             hires_mode (HiResMode): The high-resolution mode to use.
             style (str): Style of the pixels to be drawn.
         """
-        assert self._canvas_region is not None and self._canvas_size.area
-
         # Early rejection for invalid inputs
         if radius <= 0:
             return
@@ -1198,8 +1179,6 @@ class Canvas(Widget):
             hires_mode (HiResMode): The high-resolution mode to use.
             style (str): Style of the pixels to be drawn.
         """
-        assert self._canvas_region is not None and self._canvas_size.area
-
         # Early rejection for invalid inputs
         if radius <= 0:
             return
@@ -1272,8 +1251,6 @@ class Canvas(Widget):
             text (str): Text to be written.
             align (TextAlign): The alignment of the text within the canvas.
         """
-        assert self._canvas_region is not None and self._canvas_size.area
-
         if text == "":
             return
 
