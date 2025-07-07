@@ -996,7 +996,7 @@ class Canvas(Widget):
             self.set_pixel(x0, y1, char=get_box((T, 0, 0, 0)), style=style)
             return
 
-        # Height is 1, width is greater than 1.
+        # Height is 1, width is greater than 2.
         # Place two horizontal line enders and draw a horizontal line between them.
         if (y1 - y0 == 0) and (x1 - x0 >= 1):
             self.set_pixel(x0, y0, char=get_box((0, T, 0, 0)), style=style)
@@ -1006,7 +1006,7 @@ class Canvas(Widget):
             )
             return
 
-        # Width is 1, height is greater than 1.
+        # Width is 1, height is greater than 2.
         # Place two vertical line enders and draw a vertical line between them.
         if (x1 - x0 == 0) and (y1 - y0 >= 1):
             self.set_pixel(x0, y0, char=get_box((0, 0, T, 0)), style=style)
