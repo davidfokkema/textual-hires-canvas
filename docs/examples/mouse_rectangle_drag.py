@@ -1,25 +1,14 @@
 from __future__ import annotations
 from textual import on, events
 from textual.app import App, ComposeResult
-from textual.containers import Container
 from textual_hires_canvas import Canvas
 
 
-class CustomCanvas(Canvas):
+class MouseDragCanvas(Canvas):
 
     @on(Canvas.Resize)
     def handle_canvas_resize(self, event: Canvas.Resize) -> None:
         self.reset(size=event.size, refresh=True)
-
-    def clear_canvas(self) -> None:
-        """Clear the canvas."""
-
-        assert self._canvas_size, "Invalid canvas size."
-        width = self._canvas_size.width
-        height = self._canvas_size.height
-        self._buffer = [[" "] * width for _ in range(height)]
-        self._styles = [[""] * width for _ in range(height)]
-        self.refresh()
 
     def on_mouse_down(self, event: events.MouseDown) -> None:
 
@@ -29,12 +18,12 @@ class CustomCanvas(Canvas):
 
     def on_mouse_up(self) -> None:
         self.release_mouse()
-        self.clear_canvas()
+        self.reset()
 
     def on_mouse_move(self, event: events.MouseMove) -> None:
 
         if self.app.mouse_captured == self:
-            self.clear_canvas()
+            self.reset()
 
             # Get the absolute position of the mouse right now (event.screen_offset),
             # minus where it was when the mouse was pressed down (position_on_down).
@@ -51,12 +40,11 @@ class CustomCanvas(Canvas):
 class MouseRectangleDragApp(App[None]):
 
     def compose(self) -> ComposeResult:
-        yield CustomCanvas(id="canvas")
+        yield MouseDragCanvas(id="canvas")
 
     def on_mount(self) -> None:
-        canvas = self.query_one(CustomCanvas)
+        canvas = self.query_one(MouseDragCanvas)
         canvas.reset(size=canvas.size, refresh=True)
-        canvas.clear_canvas()
 
 
 if __name__ == "__main__":
