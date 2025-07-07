@@ -972,48 +972,43 @@ class Canvas(Widget):
         #    │            │
         #    │            │
         #    └────────────┘
-        # (x1, y0)     (x1, y1)
+        # (x0, y1)     (x1, y1)
+
+        # NOTE: A difference of 0 between coordinates results in a
+        # width or height of 1 cell inside Textual.
 
         T = thickness
         x0, x1 = sorted((x0, x1))
         y0, y1 = sorted((y0, y1))
 
-        # Both width and height are 1. Show nothing.
-        # Note that a diference of 0 means there's no difference between the points,
-        # meaning the width or height would be 1.
+        # Both width and height are 1. This would just be a dot, so
+        # we don't draw anything.
         if (x1 - x0 == 0) and (y1 - y0 == 0):
             return
-
-        # Height is 1, width is 2. Place two horizontal line enders and return
-        if (y1 - y0 == 0) and (x1 - x0 == 1):
+        
+        # We now know either the width or height must be higher than 2.
+        # Height is 1, place two horizontal line enders.
+        if y1 - y0 == 0:
             self.set_pixel(x0, y0, char=get_box((0, T, 0, 0)), style=style)
             self.set_pixel(x1, y0, char=get_box((0, 0, 0, T)), style=style)
+            if x1 - x0 >= 2:
+                # Width is greater than or equal to 3, draw a horizontal line
+                # between the line enders.
+                self.draw_line(
+                    x0 + 1, y0, x1 - 1, y1, char=get_box((0, T, 0, T)), style=style
+                )
             return
 
-        # Width is 1, height is 2. Place two vertical line enders and return
-        if (x1 - x0 == 0) and (y1 - y0 == 1):
+        # Width is 1, place two vertical line enders.
+        if x1 - x0 == 0:
             self.set_pixel(x0, y0, char=get_box((0, 0, T, 0)), style=style)
             self.set_pixel(x0, y1, char=get_box((T, 0, 0, 0)), style=style)
-            return
-
-        # Height is 1, width is greater than or equal to 2.
-        # Place two horizontal line enders and draw a horizontal line between them.
-        if (y1 - y0 == 0) and (x1 - x0 >= 1):
-            self.set_pixel(x0, y0, char=get_box((0, T, 0, 0)), style=style)
-            self.set_pixel(x1, y0, char=get_box((0, 0, 0, T)), style=style)
-            self.draw_line(
-                x0 + 1, y0, x1 - 1, y1, char=get_box((0, T, 0, T)), style=style
-            )
-            return
-
-        # Width is 1, height is greater than or equal to 2.
-        # Place two vertical line enders and draw a vertical line between them.
-        if (x1 - x0 == 0) and (y1 - y0 >= 1):
-            self.set_pixel(x0, y0, char=get_box((0, 0, T, 0)), style=style)
-            self.set_pixel(x0, y1, char=get_box((T, 0, 0, 0)), style=style)
-            self.draw_line(
-                x0, y0 + 1, x1, y1 - 1, char=get_box((T, 0, T, 0)), style=style
-            )
+            if y1 - y0 >= 2:
+                # Height is greater than or equal to 3, draw a horizontal line
+                # between the line enders.
+                self.draw_line(
+                    x0, y0 + 1, x1, y1 - 1, char=get_box((T, 0, T, 0)), style=style
+                )
             return
 
         # The remaining conditions require all the corner pieces to be drawn.
@@ -1022,37 +1017,22 @@ class Canvas(Widget):
         self.set_pixel(x1, y1, char=get_box((T, 0, 0, T)), style=style)
         self.set_pixel(x0, y1, char=get_box((T, T, 0, 0)), style=style)
 
-        # If width and height are both 2, we don't need any lines. Just return.
+        # If width and height are both 2, we don't need any lines. Only corners.
         if (x1 - x0 == 1) and (y1 - y0 == 1):
             return
 
-        # Width is 2, height is greater than or equal to 3.
-        # Only draw height lines.
-        if (x1 - x0 == 1) and (y1 - y0 >= 2):
-            for x in x0, x1:
-                self.draw_line(
-                    x, y0 + 1, x, y1 - 1, char=get_box((T, 0, T, 0)), style=style
-                )
-            return
-
-        # Height is 2, width is greater than or equal to 3.
-        # Only draw width lines.
-        if (y1 - y0 == 1) and (x1 - x0 >= 2):
+        # Width is greater than or equal to 3, draw horizontal lines.
+        if x1 - x0 >= 2:
             for y in y0, y1:
                 self.draw_line(
                     x0 + 1, y, x1 - 1, y, char=get_box((0, T, 0, T)), style=style
                 )
-            return
-
-        # If both width and height are greater than 2, draw all middle lines.
-        for y in y0, y1:
-            self.draw_line(
-                x0 + 1, y, x1 - 1, y, char=get_box((0, T, 0, T)), style=style
-            )
-        for x in x0, x1:
-            self.draw_line(
-                x, y0 + 1, x, y1 - 1, char=get_box((T, 0, T, 0)), style=style
-            )
+        # Height is greater than or equal to 3, draw vertical lines.
+        if y1 - y0 >= 2:
+            for x in x0, x1:
+                self.draw_line(
+                    x, y0 + 1, x, y1 - 1, char=get_box((T, 0, T, 0)), style=style
+                )
 
     def draw_filled_circle(
         self, cx: int, cy: int, radius: int, style: str = "white"
