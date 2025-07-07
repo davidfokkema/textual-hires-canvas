@@ -5,13 +5,11 @@ from textual_hires_canvas import Canvas
 
 
 class MouseDragCanvas(Canvas):
-
     @on(Canvas.Resize)
     def handle_canvas_resize(self, event: Canvas.Resize) -> None:
         self.reset(size=event.size, refresh=True)
 
     def on_mouse_down(self, event: events.MouseDown) -> None:
-
         if event.button == 1:  # left button
             self.position_on_down = event.offset
             self.capture_mouse()
@@ -21,12 +19,11 @@ class MouseDragCanvas(Canvas):
         self.reset()
 
     def on_mouse_move(self, event: events.MouseMove) -> None:
-
         if self.app.mouse_captured == self:
             self.reset()
 
-            # Get the absolute position of the mouse right now (event.screen_offset),
-            # minus where it was when the mouse was pressed down (position_on_down).
+            # Get the absolute position of the mouse right now (event.offset),
+            # minus where it was when the mouse was pressed down.
             total_delta = event.offset - self.position_on_down
 
             self.draw_rectangle_box(
@@ -37,8 +34,8 @@ class MouseDragCanvas(Canvas):
                 style="bold cyan",
             )
 
-class MouseRectangleDragApp(App[None]):
 
+class MouseRectangleDragApp(App[None]):
     def compose(self) -> ComposeResult:
         yield MouseDragCanvas(id="canvas")
 
