@@ -36,12 +36,9 @@ class MouseDragCanvas(Canvas):
 
 
 class MouseRectangleDragApp(App[None]):
-    def compose(self) -> ComposeResult:
-        yield MouseDragCanvas(id="canvas")
 
-    def on_mount(self) -> None:
-        canvas = self.query_one(MouseDragCanvas)
-        canvas.reset(size=canvas.size, refresh=True)
+    def compose(self) -> ComposeResult:
+        yield MouseDragCanvas()
 
 
 if __name__ == "__main__":
