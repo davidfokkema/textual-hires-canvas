@@ -36,7 +36,6 @@ class MouseDragCanvas(Canvas):
 
 
 class MouseRectangleDragApp(App[None]):
-
     def compose(self) -> ComposeResult:
         yield MouseDragCanvas()
 
