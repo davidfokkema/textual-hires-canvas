@@ -985,7 +985,7 @@ class Canvas(Widget):
         # we don't draw anything.
         if (x1 - x0 == 0) and (y1 - y0 == 0):
             return
-        
+
         # We now know either the width or height must be higher than 2.
         # Height is 1, place two horizontal line enders.
         if y1 - y0 == 0:
