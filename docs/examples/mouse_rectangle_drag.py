@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from textual import events, on
 from textual.app import App, ComposeResult
+from textual.widgets import Label
 
 from textual_hires_canvas import Canvas
 
@@ -38,6 +39,7 @@ class MouseDragCanvas(Canvas):
 
 class MouseRectangleDragApp(App[None]):
     def compose(self) -> ComposeResult:
+        yield Label("Click and drag rectangles with your mouse.")
         yield MouseDragCanvas()
 
 
