@@ -18,7 +18,6 @@ class MouseDragCanvas(Canvas):
 
     def on_mouse_up(self) -> None:
         self.release_mouse()
-        self.reset()
 
     def on_mouse_move(self, event: events.MouseMove) -> None:
         if self.app.mouse_captured == self:
