@@ -10,8 +10,10 @@ if sys.version_info >= (3, 11):
 else:
     from typing_extensions import Self
 
+from typing import TypeAlias
 
 import numpy as np
+from numpy.typing import NDArray
 from rich.segment import Segment
 from rich.style import Style
 from rich.text import Text
@@ -22,6 +24,9 @@ from textual.strip import Strip
 from textual.widget import Widget
 
 from textual_hires_canvas.hires import HiResMode, hires_sizes, pixels
+
+FloatScalar: TypeAlias = float | np.floating
+FloatArray: TypeAlias = NDArray[np.floating]
 
 get_box = BOX_CHARACTERS.__getitem__
 
@@ -307,7 +312,7 @@ class Canvas(Widget):
 
     def set_hires_pixels(
         self,
-        coordinates: Iterable[tuple[float, float]],
+        coordinates: Iterable[tuple[FloatScalar, FloatScalar]],
         hires_mode: HiResMode | None = None,
         style: str = "white",
     ) -> None:
@@ -453,7 +458,9 @@ class Canvas(Widget):
 
     def draw_hires_lines(
         self,
-        coordinates: Iterable[tuple[float, float, float, float]],
+        coordinates: Iterable[
+            tuple[FloatScalar, FloatScalar, FloatScalar, FloatScalar]
+        ],
         hires_mode: HiResMode | None = None,
         style: str = "white",
     ) -> None:
