@@ -10,7 +10,7 @@ if sys.version_info >= (3, 11):
 else:
     from typing_extensions import Self
 
-from typing import TypeAlias
+from typing import Callable, TypeAlias
 
 import numpy as np
 from numpy.typing import NDArray
@@ -48,7 +48,7 @@ class Canvas(Widget):
     default_hires_mode: HiResMode
 
     _canvas_size: Size
-    _canvas_region: Region | None = None
+    _canvas_region: Region
     _buffer: list[list[str]]
     _styles: list[list[str]]
 
@@ -56,7 +56,7 @@ class Canvas(Widget):
     scale_rectangle: Region | None = None
 
     # Style cache to avoid reparsing identical style strings
-    _style_cache = {}
+    _style_cache: dict[str, Style] = {}
 
     def __init__(
         self,
@@ -92,6 +92,7 @@ class Canvas(Widget):
         self._buffer = []
         self._styles = []
         self._canvas_size = Size(0, 0)
+        self._canvas_region = Region()
 
         self.scale_rectangle = scale_rectangle
         self.default_hires_mode = default_hires_mode or HiResMode.BRAILLE
@@ -209,7 +210,7 @@ class Canvas(Widget):
             return Strip.blank(cell_length=len(buffer_line))
 
         # Create segments with batching by style
-        segments = []
+        segments: list[Segment] = []
         append = segments.append  # Local reference for faster calls
 
         # Batch processing for same style segments
@@ -330,7 +331,7 @@ class Canvas(Widget):
         assert pixel_info is not None
 
         # Group coordinates by their cell position to minimize buffer operations
-        cells_to_update = {}
+        cells_to_update: dict[tuple[int, int], set[tuple[int, int]]] = {}
 
         # Pre-compute these values outside the loop for better performance
         w_factor = pixel_size.width
@@ -392,7 +393,6 @@ class Canvas(Widget):
             char: The character to draw.
             style: The style to apply to the character.
         """
-        assert self._canvas_region is not None
         if not self._canvas_region.contains(
             x0, y0
         ) and not self._canvas_region.contains(x1, y1):
@@ -488,7 +488,7 @@ class Canvas(Widget):
         inv_h_factor = 1.0 / h_factor
 
         # Initialize an empty list for collecting pixel coordinates
-        pixels = []
+        pixels: list[tuple[float, float]] = []
         pixels_append = pixels.append  # Local reference for faster calls
 
         # Process each line
@@ -608,7 +608,7 @@ class Canvas(Widget):
             return
 
         # Initialize empty list for all pixel coordinates
-        pixels = []
+        pixels: list[tuple[int, int]] = []
         pixels_append = pixels.append
 
         # Calculate interpolation factor for the middle point
@@ -633,13 +633,22 @@ class Canvas(Widget):
         if pixels:
             self.set_pixels(pixels, "█", style)
 
-    def _fill_flat_bottom_triangle(self, x0, y0, x1, y1, x2, y1_dup, pixels_append):
+    def _fill_flat_bottom_triangle(
+        self,
+        x0: int,
+        y0: int,
+        x1: int,
+        y1: int,
+        x2: int,
+        y1_dup: int,
+        pixels_append: Callable[[tuple[int, int]], None],
+    ) -> None:
         """Helper method to fill a flat-bottom triangle (private method)."""
         dx1 = (x1 - x0) / (y1 - y0) if y1 != y0 else 0
         dx2 = (x2 - x0) / (y1 - y0) if y1 != y0 else 0
 
         # Initialize scanline coordinates
-        x_start = x_end = x0
+        x_start = x_end = float(x0)
 
         # Scan from top to bottom
         for y in range(y0, y1 + 1):
@@ -651,14 +660,23 @@ class Canvas(Widget):
             x_start += dx1
             x_end += dx2
 
-    def _fill_flat_top_triangle(self, x0, y0, x1, y0_dup, x2, y2, pixels_append):
+    def _fill_flat_top_triangle(
+        self,
+        x0: int,
+        y0: int,
+        x1: int,
+        y0_dup: int,
+        x2: int,
+        y2: int,
+        pixels_append: Callable[[tuple[int, int]], None],
+    ) -> None:
         """Helper method to fill a flat-top triangle (private method)."""
         dx1 = (x2 - x0) / (y2 - y0) if y2 != y0 else 0
         dx2 = (x2 - x1) / (y2 - y0) if y2 != y0 else 0
 
         # Initialize scanline coordinates
-        x_start = x0
-        x_end = x1
+        x_start = float(x0)
+        x_end = float(x1)
 
         # Scan from top to bottom
         for y in range(y0, y2 + 1):
@@ -710,11 +728,11 @@ class Canvas(Widget):
             return
 
         # Initialize pixel collection
-        pixels = []
+        pixels: list[tuple[float, float]] = []
         pixels_append = pixels.append
 
         # Define helper function to add a hi-res pixel
-        def add_hires_pixel(x, y):
+        def add_hires_pixel(x: float, y: float) -> None:
             pixels_append((x, y))
 
         # No edge parameters needed
@@ -745,7 +763,16 @@ class Canvas(Widget):
         if pixels:
             self.set_hires_pixels(pixels, hires_mode, style)
 
-    def _fill_flat_bottom_hires_triangle(self, x0, y0, x1, y1, x2, y1_dup, add_pixel):
+    def _fill_flat_bottom_hires_triangle(
+        self,
+        x0: float,
+        y0: float,
+        x1: float,
+        y1: float,
+        x2: float,
+        y1_dup: float,
+        add_pixel: Callable[[float, float], None],
+    ) -> None:
         """Helper method to fill a flat-bottom triangle with hi-res precision (private method)."""
         # Calculate slopes
         height = y1 - y0
@@ -783,7 +810,16 @@ class Canvas(Widget):
             x_left += dx_left * y_step
             x_right += dx_right * y_step
 
-    def _fill_flat_top_hires_triangle(self, x0, y0, x1, y0_dup, x2, y2, add_pixel):
+    def _fill_flat_top_hires_triangle(
+        self,
+        x0: float,
+        y0: float,
+        x1: float,
+        y0_dup: float,
+        x2: float,
+        y2: float,
+        add_pixel: Callable[[float, float], None],
+    ) -> None:
         """Helper method to fill a flat-top triangle with hi-res precision (private method)."""
         # Calculate slopes
         height = y2 - y0
@@ -1057,7 +1093,7 @@ class Canvas(Widget):
             return
 
         # Initialize buffer to collect all pixels
-        pixels = []
+        pixels: list[tuple[int, int]] = []
         pixels_append = pixels.append  # Local reference for faster calls
 
         x = 0
@@ -1137,7 +1173,7 @@ class Canvas(Widget):
         # Initialize an empty list for collecting pixel coordinates
         # (We calculate estimated_pixels only for the safety check below)
         estimated_pixels = int(3.2 * radius * radius)  # 3.2 instead of π for safety
-        pixels = []
+        pixels: list[tuple[float, float]] = []
         pixels_append = pixels.append  # Local reference for faster calls
 
         # Use a more efficient scanning algorithm
@@ -1177,14 +1213,12 @@ class Canvas(Widget):
             radius (int): Radius of the circle.
             style (str): Style of the pixels to be drawn.
         """
-        assert self._canvas_region is not None
-
         # Early rejection for invalid inputs
         if radius <= 0:
             return
 
         # Initialize buffer to collect all pixels
-        pixels = []
+        pixels: list[tuple[int, int]] = []
         pixels_append = pixels.append  # Local reference for faster calls
 
         x = radius
@@ -1248,7 +1282,7 @@ class Canvas(Widget):
         estimated_size = int(
             radius * 16
         )  # Each step adds 8 pixels, estimate 4*radius steps
-        pixels = []
+        pixels: list[tuple[float, float]] = []
         pixels_extend = pixels.extend  # Local reference for faster calls
 
         # Pre-compute constants
@@ -1262,7 +1296,7 @@ class Canvas(Widget):
         decision: float = 1 - radius
 
         # Pre-compute points for each octant to avoid repeated calculations
-        def get_circle_points(x, y):
+        def get_circle_points(x: float, y: float) -> list[tuple[float, float]]:
             y_scaled = y * aspect_ratio
             x_scaled = x * aspect_ratio
             return [
