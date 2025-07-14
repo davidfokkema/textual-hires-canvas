@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Removed scale_rectangle attribute since that belongs in textual_plot.PlotWidget.
+
 ### Fixed
 
 - Lots and lots of type hints.

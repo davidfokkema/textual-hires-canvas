@@ -52,9 +52,6 @@ class Canvas(Widget):
     _buffer: list[list[str]]
     _styles: list[list[str]]
 
-    # FIXME: move this to PlotWidget, it has no place here.
-    scale_rectangle: Region | None = None
-
     # Style cache to avoid reparsing identical style strings
     _style_cache: dict[str, Style] = {}
 
@@ -66,8 +63,6 @@ class Canvas(Widget):
         name: str | None = None,
         id: str | None = None,
         classes: str | None = None,
-        # FIXME: move this to PlotWidget, it has no place here.
-        scale_rectangle: Region | None = None,
         disabled: bool = False,
     ):
         """Initialize the Canvas widget.
@@ -80,8 +75,6 @@ class Canvas(Widget):
             name: The name of the widget. Defaults to None.
             id: The ID of the widget. Defaults to None.
             classes: The CSS classes of the widget. Defaults to None.
-            scale_rectangle: The scale rectangle for the widget. Defaults to
-                None.
             disabled: Whether the widget is disabled. Defaults to False.
         """
         super().__init__(name=name, id=id, classes=classes, disabled=disabled)
@@ -94,7 +87,6 @@ class Canvas(Widget):
         self._canvas_size = Size(0, 0)
         self._canvas_region = Region()
 
-        self.scale_rectangle = scale_rectangle
         self.default_hires_mode = default_hires_mode or HiResMode.BRAILLE
 
         self.reset(size=Size(width, height), refresh=False)
@@ -174,7 +166,6 @@ class Canvas(Widget):
         if size:
             self._canvas_size = size
             self._canvas_region = Region(0, 0, size.width, size.height)
-            self.scale_rectangle = Region(1, 1, size.width - 2, size.height - 2)
 
         # Initialize buffers if we have a valid size
         if self._canvas_size:
