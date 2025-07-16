@@ -1336,16 +1336,14 @@ class Canvas(Widget):
             text (str): Text to be written.
             align (TextAlign): The alignment of the text within the canvas.
         """
-        if text == "":
-            return
-
         if y < 0 or y >= self._canvas_size.height:
             return
 
         # parse markup
         rich_text = Text.from_markup(text)
         # store plain text
-        plain_text = rich_text.plain
+        if (plain_text := rich_text.plain) == "":
+            return
         # store styles for each individual character
         rich_styles = []
         for c in rich_text.divide(range(1, len(plain_text))):
