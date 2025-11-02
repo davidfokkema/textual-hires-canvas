@@ -33,3 +33,7 @@ docs:
 # Serve the documentation.
 serve:
     uv run mkdocs serve
+
+# Deploy the documentation to GitHub Pages.
+deploy-docs:
+    uv run mkdocs gh-deploy --force
