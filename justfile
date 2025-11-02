@@ -25,3 +25,11 @@ format:
 # Fix formatting issues.
 fix:
     uvx ruff check --fix
+
+# Build the documentation.
+docs:
+    uv run mkdocs build
+
+# Serve the documentation.
+serve:
+    uv run mkdocs serve

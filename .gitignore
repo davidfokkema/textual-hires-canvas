@@ -13,3 +13,4 @@ wheels/
 *.csv
 # Ignore Jetbrains IDE files
 /.idea/
+agent.jsonl

@@ -1,0 +1,10 @@
+site_name: textual-hires-canvas
+theme:
+  name: material
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_style: google
