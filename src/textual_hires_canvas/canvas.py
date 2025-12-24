@@ -198,7 +198,7 @@ class Canvas(Widget):
 
         # Fast path for blank lines
         if all(char == " " for char in buffer_line):
-            return Strip.blank(cell_length=len(buffer_line))
+            return Strip.blank(cell_length=len(buffer_line), style=self.rich_style)
 
         # Create segments with batching by style
         segments: list[Segment] = []
@@ -214,7 +214,9 @@ class Canvas(Widget):
             if style_str != current_style_str:
                 # Add current batch if it exists
                 if current_text:
-                    append(Segment(current_text, style=current_style_obj))
+                    append(
+                        Segment(current_text, style=self.rich_style + current_style_obj)
+                    )
 
                 # Start new batch
                 current_style_str = style_str
@@ -233,7 +235,7 @@ class Canvas(Widget):
 
         # Add the final batch
         if current_text:
-            append(Segment(current_text, style=current_style_obj))
+            append(Segment(current_text, style=self.rich_style + current_style_obj))
 
         return Strip(segments).simplify()
 
