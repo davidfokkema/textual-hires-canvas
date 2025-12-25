@@ -193,12 +193,13 @@ class Canvas(Widget):
         if not self._canvas_size.area or y >= self._canvas_size.height:
             return Strip.blank(cell_length=0)
 
+        base_style = self.rich_style
         buffer_line = self._buffer[y]
         styles_line = self._styles[y]
 
         # Fast path for blank lines
         if all(char == " " for char in buffer_line):
-            return Strip.blank(cell_length=len(buffer_line), style=self.rich_style)
+            return Strip.blank(cell_length=len(buffer_line), style=base_style)
 
         # Create segments with batching by style
         segments: list[Segment] = []
@@ -214,9 +215,7 @@ class Canvas(Widget):
             if style_str != current_style_str:
                 # Add current batch if it exists
                 if current_text:
-                    append(
-                        Segment(current_text, style=self.rich_style + current_style_obj)
-                    )
+                    append(Segment(current_text, style=base_style + current_style_obj))
 
                 # Start new batch
                 current_style_str = style_str
@@ -235,7 +234,7 @@ class Canvas(Widget):
 
         # Add the final batch
         if current_text:
-            append(Segment(current_text, style=self.rich_style + current_style_obj))
+            append(Segment(current_text, style=base_style + current_style_obj))
 
         return Strip(segments).simplify()
 
