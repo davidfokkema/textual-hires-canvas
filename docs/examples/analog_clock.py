@@ -2,23 +2,12 @@ from __future__ import annotations
 
 import math
 from datetime import datetime
-from typing import NamedTuple
 
 from textual.app import App, ComposeResult
-from textual_hires_canvas import Canvas, HiResMode
+from textual.geometry import Offset
 from textual.reactive import var
 
-
-class Point(NamedTuple):
-    x: float
-    y: float
-
-    def __add__(self, other: Point | tuple) -> Point:
-        if isinstance(other, Point):
-            return Point(self.x + other.x, self.y + other.y)
-        elif isinstance(other, tuple):
-            return Point(self.x + other[0], self.y + other[1])
-        return NotImplemented
+from textual_hires_canvas import Canvas, HiResMode
 
 
 class AnalogClockApp(App[None]):
@@ -45,7 +34,7 @@ class AnalogClockApp(App[None]):
         canvas = self.query_one(Canvas)
         canvas.reset(self.size, refresh=False)
 
-        origin = Point(canvas.size.width // 2, canvas.size.height // 2)
+        origin = Offset(canvas.size.width // 2, canvas.size.height // 2)
         radius = canvas.size.height * 0.8
         self._draw_arms(canvas, radius, time, origin)
         self._draw_clock(canvas, origin, radius)
@@ -55,7 +44,7 @@ class AnalogClockApp(App[None]):
         canvas: Canvas,
         radius: int,
         time: datetime,
-        origin: Point,
+        origin: Offset,
     ) -> None:
         sx, sy = self._calculate_second_arm(time.second, radius, origin)
         canvas.draw_hires_line(*origin, sx, sy)
@@ -68,7 +57,7 @@ class AnalogClockApp(App[None]):
         hx, hy = self._calculate_hours_arm(hour, radius, origin)
         canvas.draw_hires_line(*origin, hx, hy, style="red")
 
-    def _draw_clock(self, canvas: Canvas, origin: Point, radius: float) -> None:
+    def _draw_clock(self, canvas: Canvas, origin: Offset, radius: float) -> None:
         canvas.draw_hires_circle(*origin, radius, hires_mode=HiResMode.QUADRANT)
         radius *= 0.5
         start = radius * 0.8
@@ -83,19 +72,19 @@ class AnalogClockApp(App[None]):
 
         canvas.draw_hires_lines(lines)
 
-    def _calculate_hours_arm(self, hours: float, radius: float, origin: Point) -> Point:
+    def _calculate_hours_arm(self, hours: float, radius: float, origin: Offset) -> Offset:
         radius *= 0.34
         total = math.radians((hours * 30) - 90)
         return self._calculate_position(total, radius, origin)
 
-    def _calculate_min_arm(self, minutes: float, radius: float, origin: Point) -> Point:
+    def _calculate_min_arm(self, minutes: float, radius: float, origin: Offset) -> Offset:
         radius *= 0.4
         total = math.radians((minutes * 6) - 90)
         return self._calculate_position(total, radius, origin)
 
     def _calculate_second_arm(
-        self, seconds: float, radius: float, origin: Point
-    ) -> Point:
+        self, seconds: float, radius: float, origin: Offset
+    ) -> Offset:
         radius *= 0.45
         radian = math.radians((seconds * 6) - 90)
         return self._calculate_position(radian, radius, origin)
@@ -104,12 +93,12 @@ class AnalogClockApp(App[None]):
         self,
         radian: float,
         radius: float,
-        origin: Point,
-    ) -> Point:
+        origin: Offset,
+    ) -> Offset:
         x = math.cos(radian)
         y = math.sin(radian)
 
-        return Point((x * (radius * 2)), (y * radius)) + origin
+        return Offset(int(x * (radius * 2)), int(y * radius)) + origin
 
 
 if __name__ == "__main__":
