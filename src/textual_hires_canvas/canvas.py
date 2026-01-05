@@ -385,11 +385,22 @@ class Canvas(Widget):
             char: The character to draw.
             style: The style to apply to the character.
         """
-        if not self._canvas_region.contains(
-            x0, y0
-        ) and not self._canvas_region.contains(x1, y1):
+        # Use Cohen-Sutherland clipping for efficient bounds checking
+        clipped = self._clip_line_cohen_sutherland(
+            float(x0), float(y0), float(x1), float(y1)
+        )
+
+        if clipped is None:
+            # Line is completely outside canvas
             return
-        self.set_pixels(self._get_line_coordinates(x0, y0, x1, y1), char, style)
+
+        # Use clipped coordinates
+        cx0, cy0, cx1, cy1 = clipped
+        self.set_pixels(
+            self._get_line_coordinates(int(cx0), int(cy0), int(cx1), int(cy1)),
+            char,
+            style,
+        )
 
     def draw_lines(
         self,
@@ -413,14 +424,20 @@ class Canvas(Widget):
         all_pixels = []
 
         for x0, y0, x1, y1 in coord_list:
-            # Skip if both endpoints are outside the canvas
-            if not self._canvas_region.contains(
-                x0, y0
-            ) and not self._canvas_region.contains(x1, y1):
+            # Use Cohen-Sutherland clipping for efficient bounds checking
+            clipped = self._clip_line_cohen_sutherland(
+                float(x0), float(y0), float(x1), float(y1)
+            )
+
+            if clipped is None:
+                # Line is completely outside canvas
                 continue
 
             # Get coordinates for this line and extend the pixel collection
-            line_pixels = self._get_line_coordinates(x0, y0, x1, y1)
+            cx0, cy0, cx1, cy1 = clipped
+            line_pixels = self._get_line_coordinates(
+                int(cx0), int(cy0), int(cx1), int(cy1)
+            )
             all_pixels.extend(line_pixels)
 
         # Draw all pixels at once with a single refresh
@@ -485,17 +502,23 @@ class Canvas(Widget):
 
         # Process each line
         for x0, y0, x1, y1 in coord_list:
-            # Skip if both endpoints are outside canvas (optimization)
-            if not self._canvas_region.contains(
-                floor(x0), floor(y0)
-            ) and not self._canvas_region.contains(floor(x1), floor(y1)):
+            # Use Cohen-Sutherland clipping for efficient bounds checking
+            clipped = self._clip_line_cohen_sutherland(
+                float(x0), float(y0), float(x1), float(y1)
+            )
+
+            if clipped is None:
+                # Line is completely outside canvas
                 continue
 
+            # Use clipped coordinates
+            cx0, cy0, cx1, cy1 = clipped
+
             # Convert to high-res grid coordinates
-            hx0 = floor(x0 * w_factor)
-            hy0 = floor(y0 * h_factor)
-            hx1 = floor(x1 * w_factor)
-            hy1 = floor(y1 * h_factor)
+            hx0 = floor(cx0 * w_factor)
+            hy0 = floor(cy0 * h_factor)
+            hx1 = floor(cx1 * w_factor)
+            hy1 = floor(cy1 * h_factor)
 
             # Get line coordinates
             coords = self._get_line_coordinates(hx0, hy0, hx1, hy1)
@@ -1389,6 +1412,102 @@ class Canvas(Widget):
         assert len(self._buffer[y]) == self._canvas_size.width
         assert len(self._styles[y]) == self._canvas_size.width
         self.refresh()
+
+    def _clip_line_cohen_sutherland(
+        self, x0: float, y0: float, x1: float, y1: float
+    ) -> tuple[float, float, float, float] | None:
+        """Clip line to canvas bounds using Cohen-Sutherland algorithm.
+
+        This algorithm efficiently determines if a line is completely outside the canvas,
+        completely inside, or needs to be clipped. It uses region codes to categorize
+        points and iteratively clips the line against the canvas boundaries.
+
+        Args:
+            x0: Starting point x coordinate
+            y0: Starting point y coordinate
+            x1: End point x coordinate
+            y1: End point y coordinate
+
+        Returns:
+            Tuple of clipped coordinates (x0, y0, x1, y1) if line intersects canvas,
+            None if line is completely outside canvas bounds.
+        """
+        # Region code constants
+        INSIDE = 0  # 0000
+        LEFT = 1  # 0001
+        RIGHT = 2  # 0010
+        BOTTOM = 4  # 0100
+        TOP = 8  # 1000
+
+        # Canvas boundaries
+        x_min = 0
+        y_min = 0
+        x_max = self._canvas_region.width - 1
+        y_max = self._canvas_region.height - 1
+
+        def compute_outcode(x: float, y: float) -> int:
+            """Compute region code for a point."""
+            code = INSIDE
+            if x < x_min:
+                code |= LEFT
+            elif x > x_max:
+                code |= RIGHT
+            if y < y_min:
+                code |= BOTTOM
+            elif y > y_max:
+                code |= TOP
+            return code
+
+        # Compute outcodes for both endpoints
+        outcode0 = compute_outcode(x0, y0)
+        outcode1 = compute_outcode(x1, y1)
+
+        while True:
+            if outcode0 == 0 and outcode1 == 0:
+                # Both points inside - trivially accept
+                return x0, y0, x1, y1
+            elif (outcode0 & outcode1) != 0:
+                # Both points share an outside region - trivially reject
+                return None
+            else:
+                # Line crosses boundary - find intersection point
+                # Pick a point that's outside
+                outcode_out = outcode0 if outcode0 != 0 else outcode1
+
+                # Find intersection point using line equation
+                # Avoid division by zero by checking if line is vertical/horizontal
+                if outcode_out & TOP:  # Point is above
+                    if y1 != y0:
+                        x = x0 + (x1 - x0) * (y_max - y0) / (y1 - y0)
+                    else:
+                        x = x0
+                    y = y_max
+                elif outcode_out & BOTTOM:  # Point is below
+                    if y1 != y0:
+                        x = x0 + (x1 - x0) * (y_min - y0) / (y1 - y0)
+                    else:
+                        x = x0
+                    y = y_min
+                elif outcode_out & RIGHT:  # Point is to the right
+                    if x1 != x0:
+                        y = y0 + (y1 - y0) * (x_max - x0) / (x1 - x0)
+                    else:
+                        y = y0
+                    x = x_max
+                else:  # LEFT - Point is to the left
+                    if x1 != x0:
+                        y = y0 + (y1 - y0) * (x_min - x0) / (x1 - x0)
+                    else:
+                        y = y0
+                    x = x_min
+
+                # Update the outside point and its outcode
+                if outcode_out == outcode0:
+                    x0, y0 = x, y
+                    outcode0 = compute_outcode(x0, y0)
+                else:
+                    x1, y1 = x, y
+                    outcode1 = compute_outcode(x1, y1)
 
     def _get_line_coordinates(
         self, x0: int, y0: int, x1: int, y1: int
