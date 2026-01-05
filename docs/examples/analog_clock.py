@@ -72,12 +72,16 @@ class AnalogClockApp(App[None]):
 
         canvas.draw_hires_lines(lines)
 
-    def _calculate_hours_arm(self, hours: float, radius: float, origin: Offset) -> Offset:
+    def _calculate_hours_arm(
+        self, hours: float, radius: float, origin: Offset
+    ) -> Offset:
         radius *= 0.34
         total = math.radians((hours * 30) - 90)
         return self._calculate_position(total, radius, origin)
 
-    def _calculate_min_arm(self, minutes: float, radius: float, origin: Offset) -> Offset:
+    def _calculate_min_arm(
+        self, minutes: float, radius: float, origin: Offset
+    ) -> Offset:
         radius *= 0.4
         total = math.radians((minutes * 6) - 90)
         return self._calculate_position(total, radius, origin)
