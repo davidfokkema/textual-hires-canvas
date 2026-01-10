@@ -10,7 +10,7 @@ from textual.widgets import Label
 
 from textual_hires_canvas import Canvas, HiResMode
 
-N = 100
+N = 10_000
 
 # X = -100, 100
 # Y = -100, 100
@@ -29,7 +29,7 @@ class MinimalApp(App[None]):
         yield Canvas(80, 24)
 
     def on_mount(self) -> None:
-        self.draw_single_rectangle()
+        self.draw()
 
     def draw_single_rectangle(self) -> None:
         canvas = self.query_one(Canvas)
@@ -84,8 +84,8 @@ class MinimalApp(App[None]):
             )
             # canvas.draw_hires_line(x0, y0, x1, y1, style=style)
             self.t += time.monotonic_ns() - t0
-            await asyncio.sleep(0.05)
-        # await self.action_quit()
+            await asyncio.sleep(0)
+        self.draw_single_rectangle()
 
 
 if __name__ == "__main__":
