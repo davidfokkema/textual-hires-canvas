@@ -3,7 +3,7 @@ import sys
 from collections.abc import AsyncIterator, Iterable, Iterator
 from contextlib import asynccontextmanager, contextmanager
 from dataclasses import dataclass
-from math import floor
+from math import ceil, floor
 
 if sys.version_info >= (3, 11):
     from typing import Self
@@ -1137,6 +1137,174 @@ class Canvas(Widget):
             self._styles[y][clipped_x_start : clipped_x_end + 1] = style_row
 
         self.refresh()
+
+    def draw_filled_hires_rectangle(
+        self,
+        x0: float,
+        y0: float,
+        x1: float,
+        y1: float,
+        hires_mode: HiResMode | None = None,
+        style: str = "white",
+    ) -> None:
+        """Draw a filled high-resolution rectangle using a hybrid approach.
+        The inner, full-cell part of the rectangle is drawn with solid
+        block characters for performance, while the fractional edges are
+        drawn with high-resolution pixels.
+
+        Args:
+            x0: The x-coordinate of the first corner.
+            y0: The y-coordinate of the first corner.
+            x1: The x-coordinate of the second corner.
+            y1: The y-coordinate of the second corner.
+            hires_mode: The high-resolution mode to use.
+            style: The style to apply to the characters.
+        """
+        x_start, x_end = sorted((x0, x1))
+        y_start, y_end = sorted((y0, y1))
+
+        if x_start == x_end and y_start == y_end:
+            self.set_hires_pixels([(x_start, y_start)], hires_mode, style)
+            return
+
+        hires_mode = hires_mode or self.default_hires_mode
+        pixel_size = hires_sizes[hires_mode]
+
+        # Get the appropriate full-block character for the hires mode.
+        num_pixels = pixel_size.width * pixel_size.height
+        full_block_key = tuple([1] * num_pixels)
+        full_block_char = pixels[hires_mode][full_block_key]
+        assert isinstance(full_block_char, str)
+
+        # Define a helper to generate hires pixels for a given rectangular area.
+        def _get_hires_pixels_for_area(ax0, ay0, ax1, ay1):
+            if ax0 >= ax1 or ay0 >= ay1:
+                return []
+
+            _pixels = []
+            _width = ax1 - ax0
+            _height = ay1 - ay0
+            _x_steps = max(1, int(ceil(_width * pixel_size.width)))
+            _y_steps = max(1, int(ceil(_height * pixel_size.height)))
+
+            for i in range(_y_steps + 1):
+                py = ay0 + (i / _y_steps) * _height
+                for j in range(_x_steps + 1):
+                    px = ax0 + (j / _x_steps) * _width
+                    _pixels.append((px, py))
+            return _pixels
+
+        ix_start = ceil(x_start)
+        iy_start = ceil(y_start)
+        ix_end = floor(x_end)
+        iy_end = floor(y_end)
+
+        border_pixels = []
+
+        # If the rectangle is too thin to have a solid inner part,
+        # draw the whole thing with hires pixels.
+        if ix_start >= ix_end or iy_start >= iy_end:
+            border_pixels.extend(
+                _get_hires_pixels_for_area(x_start, y_start, x_end, y_end)
+            )
+        else:
+            # Draw the solid inner rectangle first (only for completely filled cells).
+            self.draw_filled_rectangle(
+                int(ix_start),
+                int(iy_start),
+                int(ix_end - 1),
+                int(iy_end - 1),
+                char=full_block_char,
+                style=style,
+            )
+
+            # Then, calculate the pixels for the border regions.
+            # Any cell touching a fractional boundary needs hires pixels.
+            # The layout is:
+            #   [TL] [Top]    [TR]
+            #   [L]  [solid]  [R]
+            #   [BL] [Bottom] [BR]
+            #
+            # Key insight:
+            # - ix_start = ceil(x_start): first fully-covered cell in x
+            # - ix_end = floor(x_end): last coordinate before right fractional part
+            # - Fully covered cells in x: ceil(x_start) to floor(x_end) - 1
+            # - Left fractional: x_start to ceil(x_start)
+            # - Right fractional: floor(x_end) to x_end (only if x_end is not an integer)
+
+            # Use a small epsilon to avoid including boundary pixels that belong to adjacent cells
+            epsilon = 1e-9
+
+            # Top-left corner (fractional x AND fractional y)
+            if ix_start > x_start and iy_start > y_start:
+                border_pixels.extend(
+                    _get_hires_pixels_for_area(
+                        x_start,
+                        y_start,
+                        float(ix_start) - epsilon,
+                        float(iy_start) - epsilon,
+                    )
+                )
+            # Top strip (fully covered x cells, fractional y)
+            if ix_start < ix_end and iy_start > y_start:
+                border_pixels.extend(
+                    _get_hires_pixels_for_area(
+                        float(ix_start),
+                        y_start,
+                        float(ix_end) - epsilon,
+                        float(iy_start) - epsilon,
+                    )
+                )
+            # Top-right corner (fractional x AND fractional y)
+            if ix_end < x_end and iy_start > y_start:
+                border_pixels.extend(
+                    _get_hires_pixels_for_area(
+                        float(ix_end), y_start, x_end, float(iy_start) - epsilon
+                    )
+                )
+
+            # Left strip (fractional x, fully covered y cells)
+            if ix_start > x_start and iy_start < iy_end:
+                border_pixels.extend(
+                    _get_hires_pixels_for_area(
+                        x_start,
+                        float(iy_start),
+                        float(ix_start) - epsilon,
+                        float(iy_end) - epsilon,
+                    )
+                )
+            # Right strip (fractional x, fully covered y cells)
+            if ix_end < x_end and iy_start < iy_end:
+                border_pixels.extend(
+                    _get_hires_pixels_for_area(
+                        float(ix_end), float(iy_start), x_end, float(iy_end) - epsilon
+                    )
+                )
+
+            # Bottom-left corner (fractional x AND fractional y)
+            if ix_start > x_start and iy_end < y_end:
+                border_pixels.extend(
+                    _get_hires_pixels_for_area(
+                        x_start, float(iy_end), float(ix_start) - epsilon, y_end
+                    )
+                )
+            # Bottom strip (fully covered x cells, fractional y)
+            if ix_start < ix_end and iy_end < y_end:
+                border_pixels.extend(
+                    _get_hires_pixels_for_area(
+                        float(ix_start), float(iy_end), float(ix_end) - epsilon, y_end
+                    )
+                )
+            # Bottom-right corner (fractional x AND fractional y)
+            if ix_end < x_end and iy_end < y_end:
+                border_pixels.extend(
+                    _get_hires_pixels_for_area(
+                        float(ix_end), float(iy_end), x_end, y_end
+                    )
+                )
+
+        if border_pixels:
+            self.set_hires_pixels(border_pixels, hires_mode, style)
 
     def draw_filled_circle(
         self, cx: int, cy: int, radius: int, style: str = "white"
