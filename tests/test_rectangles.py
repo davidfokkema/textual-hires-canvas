@@ -39,7 +39,7 @@ class MinimalApp(App[None]):
             3 + self.yshift,
             60 + self.xshift,
             18 + self.yshift,
-            hires_mode=HiResMode.HALFBLOCK,
+            hires_mode=HiResMode.BRAILLE,
         )
 
     def on_key(self, event: Key) -> None:

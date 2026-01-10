@@ -1170,6 +1170,12 @@ class Canvas(Widget):
         hires_mode = hires_mode or self.default_hires_mode
         pixel_size = hires_sizes[hires_mode]
 
+        # Round the fractional coordinates to hires pixel-precision
+        x_start = round(x_start * pixel_size.width) / pixel_size.width
+        x_end = round(x_end * pixel_size.width) / pixel_size.width
+        y_start = round(y_start * pixel_size.height) / pixel_size.height
+        y_end = round(y_end * pixel_size.height) / pixel_size.height
+
         # Get the appropriate full-block character for the hires mode.
         num_pixels = pixel_size.width * pixel_size.height
         full_block_key = tuple([1] * num_pixels)
@@ -1184,8 +1190,8 @@ class Canvas(Widget):
             _pixels = []
             _width = ax1 - ax0
             _height = ay1 - ay0
-            _x_steps = max(1, int(ceil(_width * pixel_size.width)))
-            _y_steps = max(1, int(ceil(_height * pixel_size.height)))
+            _x_steps = max(1, ceil(_width * pixel_size.width))
+            _y_steps = max(1, ceil(_height * pixel_size.height))
 
             for i in range(_y_steps + 1):
                 py = ay0 + (i / _y_steps) * _height
@@ -1194,6 +1200,7 @@ class Canvas(Widget):
                     _pixels.append((px, py))
             return _pixels
 
+        # coordinates for the inner full-cell rectangle
         ix_start = ceil(x_start)
         iy_start = ceil(y_start)
         ix_end = floor(x_end)
@@ -1218,53 +1225,43 @@ class Canvas(Widget):
                 style=style,
             )
 
-            # Then, calculate the pixels for the border regions.
             # Any cell touching a fractional boundary needs hires pixels.
             # The layout is:
-            #   [TL] [Top]    [TR]
-            #   [L]  [solid]  [R]
-            #   [BL] [Bottom] [BR]
+            #   [      Top      ]
+            #   [L]  [inner]  [R]
+            #   [    Bottom     ]
             #
-            # Key insight:
-            # - ix_start = ceil(x_start): first fully-covered cell in x
-            # - ix_end = floor(x_end): last coordinate before right fractional part
-            # - Fully covered cells in x: ceil(x_start) to floor(x_end) - 1
-            # - Left fractional: x_start to ceil(x_start)
-            # - Right fractional: floor(x_end) to x_end (only if x_end is not an integer)
+            # ix_start, etc. are the coordinates for the inner full-cell block.
+            # x_start etc. are the coordinates for the fractional parts of the
+            # rectangle.
 
             # Use a small epsilon to avoid including boundary pixels that belong to adjacent cells
             epsilon = 1e-9
 
-            # Top-left corner (fractional x AND fractional y)
-            if ix_start > x_start and iy_start > y_start:
+            # Top strip
+            if y_start < iy_start:
                 border_pixels.extend(
                     _get_hires_pixels_for_area(
                         x_start,
                         y_start,
-                        float(ix_start) - epsilon,
+                        x_end - epsilon,
                         float(iy_start) - epsilon,
-                    )
-                )
-            # Top strip (fully covered x cells, fractional y)
-            if ix_start < ix_end and iy_start > y_start:
-                border_pixels.extend(
-                    _get_hires_pixels_for_area(
-                        float(ix_start),
-                        y_start,
-                        float(ix_end) - epsilon,
-                        float(iy_start) - epsilon,
-                    )
-                )
-            # Top-right corner (fractional x AND fractional y)
-            if ix_end < x_end and iy_start > y_start:
-                border_pixels.extend(
-                    _get_hires_pixels_for_area(
-                        float(ix_end), y_start, x_end, float(iy_start) - epsilon
                     )
                 )
 
-            # Left strip (fractional x, fully covered y cells)
-            if ix_start > x_start and iy_start < iy_end:
+            # Bottom strip
+            if y_end > iy_end:
+                border_pixels.extend(
+                    _get_hires_pixels_for_area(
+                        x_start,
+                        float(iy_end),
+                        x_end - epsilon,
+                        y_end - epsilon,
+                    )
+                )
+
+            # Left strip
+            if x_start < ix_start:
                 border_pixels.extend(
                     _get_hires_pixels_for_area(
                         x_start,
@@ -1273,33 +1270,15 @@ class Canvas(Widget):
                         float(iy_end) - epsilon,
                     )
                 )
-            # Right strip (fractional x, fully covered y cells)
-            if ix_end < x_end and iy_start < iy_end:
-                border_pixels.extend(
-                    _get_hires_pixels_for_area(
-                        float(ix_end), float(iy_start), x_end, float(iy_end) - epsilon
-                    )
-                )
 
-            # Bottom-left corner (fractional x AND fractional y)
-            if ix_start > x_start and iy_end < y_end:
+            # Right strip
+            if x_end > ix_end:
                 border_pixels.extend(
                     _get_hires_pixels_for_area(
-                        x_start, float(iy_end), float(ix_start) - epsilon, y_end
-                    )
-                )
-            # Bottom strip (fully covered x cells, fractional y)
-            if ix_start < ix_end and iy_end < y_end:
-                border_pixels.extend(
-                    _get_hires_pixels_for_area(
-                        float(ix_start), float(iy_end), float(ix_end) - epsilon, y_end
-                    )
-                )
-            # Bottom-right corner (fractional x AND fractional y)
-            if ix_end < x_end and iy_end < y_end:
-                border_pixels.extend(
-                    _get_hires_pixels_for_area(
-                        float(ix_end), float(iy_end), x_end, y_end
+                        float(ix_end),
+                        float(iy_start),
+                        x_end - epsilon,
+                        float(iy_end) - epsilon,
                     )
                 )
 
