@@ -1092,6 +1092,52 @@ class Canvas(Widget):
                     x, y0 + 1, x, y1 - 1, char=get_box((T, 0, T, 0)), style=style
                 )
 
+    def draw_filled_rectangle(
+        self,
+        x0: int,
+        y0: int,
+        x1: int,
+        y1: int,
+        char: str = "█",
+        style: str = "white",
+    ) -> None:
+        """Draw a filled rectangle using the specified character and style.
+
+        Args:
+            x0: The x-coordinate of the first corner.
+            y0: The y-coordinate of the first corner.
+            x1: The x-coordinate of the second corner.
+            y1: The y-coordinate of the second corner.
+            char: The character to draw.
+            style: The style to apply to the character.
+        """
+        x_start, x_end = sorted((x0, x1))
+        y_start, y_end = sorted((y0, y1))
+
+        # Clip the rectangle to the canvas boundaries
+        canvas_width = self._canvas_region.width
+        canvas_height = self._canvas_region.height
+
+        clipped_x_start = max(x_start, 0)
+        clipped_y_start = max(y_start, 0)
+        clipped_x_end = min(x_end, canvas_width - 1)
+        clipped_y_end = min(y_end, canvas_height - 1)
+
+        # If the rectangle is completely outside the canvas, do nothing.
+        if clipped_x_start > clipped_x_end or clipped_y_start > clipped_y_end:
+            return
+
+        fill_width = clipped_x_end - clipped_x_start + 1
+
+        char_row = [char] * fill_width
+        style_row = [style] * fill_width
+
+        for y in range(clipped_y_start, clipped_y_end + 1):
+            self._buffer[y][clipped_x_start : clipped_x_end + 1] = char_row
+            self._styles[y][clipped_x_start : clipped_x_end + 1] = style_row
+
+        self.refresh()
+
     def draw_filled_circle(
         self, cx: int, cy: int, radius: int, style: str = "white"
     ) -> None:
