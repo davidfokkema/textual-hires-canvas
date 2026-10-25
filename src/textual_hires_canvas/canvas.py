@@ -365,12 +365,41 @@ class Canvas(Widget):
             # Convert to subpixels and look up the character
             subpixels = tuple(int(v) for v in cell_buffer.flat)
             if char := pixel_info[subpixels]:
-                self.set_pixel(
-                    cell_x,
-                    cell_y,
-                    char=char,
-                    style=style,
-                )
+                cell_style = style
+                if hires_mode == HiResMode.HALFBLOCK:
+                    char, cell_style = self._merge_half_blocks(cell_x, cell_y, char, style)
+                self.set_pixel(cell_x, cell_y, char=char, style=cell_style)
+
+    def _merge_half_blocks(self, x: int, y: int, char: str, style: str) -> tuple[str, str]:
+        """Combine a new half block with the half block already in a cell.
+
+        A terminal cell holds a single glyph, so a half block drawn on its own
+        leaves the other half of the cell empty. When the cell already shows a
+        half or full block, the half that is not being drawn keeps its colour,
+        as the background of the new glyph.
+
+        Args:
+            x: The x-coordinate of the cell.
+            y: The y-coordinate of the cell.
+            char: The new half-block character ("▀", "▄" or "█").
+            style: The style of the new character.
+        Returns:
+            The character and style to store in the cell.
+        """
+        upper, lower = _half_block_colors(*self.get_pixel(x, y))
+        new = Style.parse(style)
+        if char in ("▀", "█"):
+            upper = new
+        if char in ("▄", "█"):
+            lower = new
+        if upper is not None and lower is not None:
+            if upper == lower:
+                return "█", str(upper)
+            return "▀", str(upper + Style(bgcolor=lower.color))
+        if upper is not None:
+            return "▀", str(upper)
+        assert lower is not None
+        return "▄", str(lower)
 
     def draw_line(
         self, x0: int, y0: int, x1: int, y1: int, char: str = "█", style: str = "white"
@@ -1773,3 +1802,22 @@ class Canvas(Widget):
                 break
 
         return points
+
+
+def _half_block_colors(char: str, style: str) -> tuple[Style | None, Style | None]:
+    """Return the styles of the upper and lower half of a cell.
+
+    Only cells drawn with half or full blocks have halves; for any other
+    character both are None, so the cell is simply replaced.
+    """
+    if char not in ("▀", "▄", "█") or not style:
+        return None, None
+    parsed = Style.parse(style)
+    # the glyph's own colour, without the background of the other half
+    fg = Style(color=parsed.color, bold=parsed.bold, dim=parsed.dim)
+    bg = Style(color=parsed.bgcolor) if parsed.bgcolor else None
+    if char == "█":
+        return fg, fg
+    if char == "▀":
+        return fg, bg
+    return bg, fg
